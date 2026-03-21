@@ -64,6 +64,7 @@ Clonează repository-ul
 git clone https://github.com/RaduRares/Proiect-AWDB-Hotel
 cd hotel-management
 
+!!!! INAINTE DE FIECARE PUSH, A NU SE UITA SA SE FACA PULL PENTRU A MINIMIZA MERGE CONFLICTS !!!!!!
 ## Structura proiectului
 ```
 
