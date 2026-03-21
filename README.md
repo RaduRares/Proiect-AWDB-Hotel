@@ -32,7 +32,7 @@ Entități
 
 
 Diagrama ER
-
+```
 Hotel (1) ──────────── (M) Tipuri_Camera
 Hotel (1) ──────────── (M) Angajat
 Hotel (1) ──────────── (M) Rezervar
@@ -42,7 +42,7 @@ TipCamera(1) ──────────── (M) Rezervare
 Rezervare(1) ──────────── (1) Factura           ← @OneToOne
 Rezervare(1) ──────────── (M) Rezervare_serviciu
 Serviciu (1) ──────────── (M) Rezervare_serviciu
-
+```
 Tipuri de relații acoperite
 
 - `@OneToOne` — Rezervare → Factură
