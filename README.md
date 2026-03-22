@@ -50,6 +50,19 @@ Tipuri de relații acoperite
 - `@ManyToMany` — Hotel ↔ Furnizori, User ↔ Roluri
 
 
+## USER — autentificare Spring Security
+
+Cookie 1: JSESSIONID
+
+- session cookie, generat automat de Spring
+- expiră la închiderea browserului sau după 30 min inactivitate
+- NU se stochează în DB (e în memoria serverului)
+
+Cookie 2: remember-me
+- persistent cookie, 14 zile
+- setat doar dacă userul bifează "Ține-mă minte" la login
+- valoarea hash-uită este stocată în tabelul persistent_logins
+- la fiecare request, Spring rotește automat tokenul (securitate)
 
 ##  Setup & Rulare
 
