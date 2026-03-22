@@ -15,20 +15,20 @@ Descriere proiect:
 
 Entități 
 
-| Entitate           | Câmpuri stabilite                                                              |
-|--------------------|--------------------------------------------------------------------------------|
-| `hotel`            | id, nume, stele, adresa, data_infiintare                                       |
-| `tip_camera`       | id, nume, pret, hotel_id                                                       |
-| `oaspete`          | id, nume, prenume, email, telefon, data_inregistrare                           |
-| `angajat`          | id, nume_prenume, functie, salariu, data_angajare, hotel_id                    |
-| `furnizor`         | id, nume, email, tip_furnizor                                                  |
-| `hotel_furnizor`   | hotel_id, furnizor_id *(tabel de legătură ManyToMany)*                         |
-| `rezervare`        | id, check_in, check_out, status, creat_la, hotel_id, oaspete_id, tip_camera_id |
-| `serviciu`         | id, nume, cost                                                                 |
-| `rezervare_serviciu` | id, cantitate, data_folosinta, rezervare_id, serviciu_id                       |
-| `factură`          | id, numar_factura, suma_totala, emisa_la, status_plata, rezervare_id           |
-| `user`            |                                                                                |
-
+| Entitate           | Câmpuri stabilite                                                                  |
+|--------------------|------------------------------------------------------------------------------------|
+| `hotel`            | id, nume, stele, adresa, data_infiintare, create_la                                |
+| `tip_camera`       | id, nume, descriere, pret, capacitate, hotel_id                                    |
+| `oaspete`          | id, nume, prenume, email, telefon, data_inregistrare                               |
+| `angajat`          | id, nume_prenume, functie, email, telefon, salariu, data_angajare, activ, hotel_id |
+| `furnizor`         | id, nume, email, tip_furnizor, adresa, activ                                       |
+| `hotel_furnizor`   | hotel_id, furnizor_id *(tabel de legătură ManyToMany)*                             |
+| `rezervare`        | id, check_in, check_out, status, creat_la, hotel_id, oaspete_id, tip_camera_id     |
+| `serviciu`         | id, nume, cost                                                                     |
+| `rezervare_serviciu` | id, cantitate, data_folosinta, rezervare_id, serviciu_id                           |
+| `factură`          | id, numar_factura, suma_totala, emisa_la, status_plata, rezervare_id               |
+| `user`            | id, username, email, password, enabled, creat_la                                        |
+    
 
 
 Diagrama ER
@@ -52,17 +52,31 @@ Tipuri de relații acoperite
 
 ## USER — autentificare Spring Security
 
-Cookie 1: JSESSIONID
+### Cookie 1: JSESSIONID
 
 - session cookie, generat automat de Spring
 - expiră la închiderea browserului sau după 30 min inactivitate
 - NU se stochează în DB (e în memoria serverului)
 
-Cookie 2: remember-me
+### Cookie 2: remember-me
 - persistent cookie, 14 zile
 - setat doar dacă userul bifează "Ține-mă minte" la login
 - valoarea hash-uită este stocată în tabelul persistent_logins
 - la fiecare request, Spring rotește automat tokenul (securitate)
+
+
+##  Autentificare — Spring Security
+
+### Cookie 1: JSESSIONID
+- Session cookie, generat automat de Spring
+- Expiră la închiderea browserului sau după 30 min inactivitate
+- Nu se stochează în DB (e în memoria serverului)
+
+### Cookie 2: remember-me
+- Persistent cookie, valabil 14 zile
+- Setat doar dacă userul bifează **"Ține-mă minte"** la login
+- Valoarea este stocată în tabelul `persistent_logins` din DB
+- La fiecare request, Spring rotește automat tokenul
 
 ##  Setup & Rulare
 
@@ -109,6 +123,10 @@ hotel-management/
 ├── .gitignore
 └── README.md
 
+```
+```
+main   ← cod stabil
+└── dev ← development activ
 ```
 
 ---
