@@ -2,8 +2,8 @@
 Construită cu Spring Boot, Maven , PostgresSQL 
 
 Echipa va fi formata din:
-    1.Costache Alexandra Grabriela
-    2.Radu Rareș-Andrei
+    1. Costache Alexandra Grabriela
+    2. Radu Rareș-Andrei
 
 Descriere proiect:
     -Gestionarea hotelurilor, tipurilor de camere și angajaților
