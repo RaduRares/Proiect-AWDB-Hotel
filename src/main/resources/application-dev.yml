@@ -1,0 +1,27 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/hotel_dev
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: true
+  h2:
+    console:
+      enabled: false
+  thymeleaf:
+    cache: false
+
+logging:
+  level:
+    root: INFO
+    com.hotel: DEBUG
+    org.springframework.security: INFO
+  file:
+    name: logs/hotel-dev.log

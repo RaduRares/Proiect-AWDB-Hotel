@@ -51,6 +51,9 @@ public class SecurityConfig {
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/login?logout")
                 .permitAll())
+        .rememberMe(rm -> rm
+                .key("hotelManagementSecretKey")
+                .tokenValiditySeconds(604800))
         .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
         .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()));
         

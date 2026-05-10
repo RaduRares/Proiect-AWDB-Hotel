@@ -31,23 +31,111 @@ Entități
     
 
 
-Diagrama ER
-```
-Hotel (1) ──────────── (M) Tipuri_Camera
-Hotel (1) ──────────── (M) Angajat
-Hotel (1) ──────────── (M) Rezervar
-Hotel (M) ──────────── (M) Furnizor        ← @ManyToMany
-Oaspete  (1) ──────────── (M) Rezervare
-TipCamera(1) ──────────── (M) Rezervare
-Rezervare(1) ──────────── (1) Factura           ← @OneToOne
-Rezervare(1) ──────────── (M) Rezervare_serviciu
-Serviciu (1) ──────────── (M) Rezervare_serviciu
-```
-Tipuri de relații acoperite
+## Diagrama ER
 
-- `@OneToOne` — Rezervare → Factură
-- `@OneToMany` / `@ManyToOne` — Hotel → Camere, Hotel → Angajați, Hotel → Rezervări, Oaspete → Rezervări
-- `@ManyToMany` — Hotel ↔ Furnizori, User ↔ Roluri
+```mermaid
+erDiagram
+    HOTEL {
+        Long id PK
+        String nume
+        int stele
+        String adresa
+        String oras
+        String telefon_rezervari
+        String email_rezervari
+    }
+    TIP_CAMERA {
+        Long id PK
+        String nume
+        String descriere
+        BigDecimal pret
+        int capacitate
+        Long hotel_id FK
+    }
+    REZERVARE {
+        Long id PK
+        LocalDate check_in
+        LocalDate check_out
+        String status
+        int nr_persoane
+        String observatii
+        LocalDateTime creat_la
+        Long hotel_id FK
+        Long oaspete_id FK
+        Long tip_camera FK
+    }
+    OASPETE {
+        Long id PK
+        String nume
+        String telefon
+        String cnp
+        LocalDate data_nastere
+        LocalDate data_inregistrare
+    }
+    ANGAJAT {
+        Long id PK
+        String nume_prenume
+        BigDecimal salariu
+        LocalDate data_angajare
+        Boolean activ_munca
+        String functie
+        Long hotel_id FK
+    }
+    SERVICIU {
+        Long id PK
+        String nume
+        String descriere
+        int cost
+        Boolean activ
+    }
+    REZERVARE_SERVICIU {
+        Long id PK
+        Long rezervare_id FK
+        Long serviciu_id FK
+        int cantitate
+    }
+    FACTURA {
+        Long id PK
+        String numar_factura
+        BigDecimal suma_totala
+        BigDecimal suma_camera
+        BigDecimal suma_servicii
+        LocalDateTime emisa_la
+        LocalDate scadenta
+        String status_plata
+        Long rezervare_id FK
+    }
+    USER {
+        Long id PK
+        String username
+        String email
+        String password
+        Boolean enabled
+        LocalDateTime creat_la
+    }
+    ROL {
+        Long id PK
+        String nume
+    }
+
+    HOTEL ||--o{ ANGAJAT : "angajeaza"
+    HOTEL ||--o{ REZERVARE : "are"
+    HOTEL ||--o{ TIP_CAMERA : "ofera"
+    TIP_CAMERA ||--o{ REZERVARE : "folosita_in"
+    OASPETE ||--o{ REZERVARE : "face"
+    REZERVARE ||--o| FACTURA : "genereaza"
+    REZERVARE ||--o{ REZERVARE_SERVICIU : "include"
+    SERVICIU ||--o{ REZERVARE_SERVICIU : "folosit_in"
+    USER }o--o{ ROL : "are"
+```
+
+## Tipuri de relații acoperite
+
+| Tip | Exemplu |
+|-----|---------|
+| `@OneToOne` | Rezervare ↔ Factura |
+| `@OneToMany` / `@ManyToOne` | Hotel → Angajati, Hotel → Rezervari, Hotel → TipuriCamere, Oaspete → Rezervari |
+| `@ManyToMany` | User ↔ Rol |
 
 
 ## USER — autentificare Spring Security
@@ -78,20 +166,69 @@ Tipuri de relații acoperite
 - Valoarea este stocată în tabelul `persistent_logins` din DB
 - La fiecare request, Spring rotește automat tokenul
 
+## Roluri și permisiuni
+
+| Rol | Acces |
+|-----|-------|
+| `ADMIN` | Toate paginile, inclusiv `/inventar-camere/**` și `/angajati/**` |
+| `RECEPTIONER` | `/angajati/**`, `/facturi/**`, plus paginile de baza |
+| `USER` | Hoteluri, oaspeti, rezervari, servicii |
+
+**Cont admin implicit:** `admin` / `admin123`
+
+## Multi-Environment Configuration
+
+| Profil | Baza de date | Activare |
+|--------|-------------|----------|
+| *(implicit)* | H2 In-Memory | `mvn spring-boot:run` |
+| `dev` | PostgreSQL | `mvn spring-boot:run -Dspring-boot.run.profiles=dev` |
+| `test` | H2 In-Memory (izolat) | folosit automat de `mvn test` |
+
+Fisiere de configurare: `application.properties`, `application-dev.yml`, `application-test.yml`
+
+## Paginare și sortare
+
+Implementata pentru: **Hotel**, **Oaspete**, **Rezervare**, **Angajat**
+
+Criterii de sortare: `nume`, `stele`, `oras`, `checkIn`, `checkOut`, `status`, `salariu`, `dataAngajare`
+
+## Testare
+
+```bash
+mvn test
+```
+
+- **Unit tests** (Mockito): `HotelServiceTest`, `RezervareServiceTest`, `OaspeteServiceTest`
+- **Integration tests** (H2 + MockMvc): `HotelIntegrationTest`, `OaspeteIntegrationTest`, `SecurityIntegrationTest`
+
+## Logging
+
+| Fisier | Continut |
+|--------|----------|
+| `logs/hotel-app.log` | Toate evenimentele (INFO+) |
+| `logs/hotel-errors.log` | Doar erorile (ERROR) |
+
+Nivel DEBUG activat pentru pachetul `com.hotel`.
+
 ##  Setup & Rulare
 
-###  Programe necesare 
+###  Programe necesare
 
 - Java 17+
 - Maven 3.9+
-- PostgreSQL 15+ 
+- PostgreSQL 15+ (doar pentru profilul `dev`)
 
-Clonează repository-ul
+Cloneaza repository-ul:
 
+```bash
 git clone https://github.com/RaduRares/Proiect-AWDB-Hotel
 cd hotel-management
+```
 
-!!!! INAINTE DE FIECARE PUSH, A NU SE UITA SA SE FACA PULL PENTRU A MINIMIZA MERGE CONFLICTS !!!!!!
+H2 Console (implicit): `http://localhost:8080/h2-console`  
+URL JDBC: `jdbc:h2:mem:hoteldb` | User: `sa` | Parola: *(goala)*
+
+!!!! INAINTE DE FIECARE PUSH, A NU SE UITA SA SE FACA PULL PENTRU A MINIMIZA MERGE CONFLICTS !!!!!!!
 ## Structura proiectului
 ```
 

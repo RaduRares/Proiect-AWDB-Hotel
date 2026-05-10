@@ -19,8 +19,12 @@ public class Rezervare {
     private Long id;
 
 @NotNull
-    @Column(name="check_out",nullable = false)
-    private String checkOut;
+    @Column(name="check_in", nullable = false)
+    private LocalDate checkIn;
+
+    @NotNull
+    @Column(name="check_out", nullable = false)
+    private LocalDate checkOut;
 
 @Enumerated(EnumType.STRING)
     @Column(nullable = false)
