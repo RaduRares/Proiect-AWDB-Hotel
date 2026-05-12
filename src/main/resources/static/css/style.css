@@ -1,0 +1,40 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.navbar-brand {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.card {
+    border-radius: 0.5rem;
+}
+
+.table th a {
+    white-space: nowrap;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+dt {
+    font-weight: 600;
+    color: #495057;
+}
+
+.badge {
+    font-size: 0.8rem;
+    padding: 0.35em 0.6em;
+}
+
+footer {
+    border-top: 1px solid #dee2e6;
+}
+
+/* Pagination active page */
+.page-item.active .page-link {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
