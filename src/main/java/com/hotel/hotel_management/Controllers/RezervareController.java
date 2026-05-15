@@ -70,9 +70,15 @@ public class RezervareController {
             populateFormDropdowns(model);
             return "rezervari/form";
         }
-        rezervareService.save(rezervare);
-        redirectAttributes.addFlashAttribute("success", "Rezervarea a fost creata cu succes!");
-        return "redirect:/rezervari";
+        try {
+            rezervareService.save(rezervare);
+            redirectAttributes.addFlashAttribute("success", "Rezervarea a fost creata cu succes!");
+            return "redirect:/rezervari";
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("error", e.getMessage());
+            populateFormDropdowns(model);
+            return "rezervari/form";
+        }
     }
 
     @GetMapping("/{id}")
@@ -98,9 +104,15 @@ public class RezervareController {
             return "rezervari/form";
         }
         rezervare.setId(id);
-        rezervareService.save(rezervare);
-        redirectAttributes.addFlashAttribute("success", "Rezervarea a fost actualizata cu succes!");
-        return "redirect:/rezervari";
+        try {
+            rezervareService.save(rezervare);
+            redirectAttributes.addFlashAttribute("success", "Rezervarea a fost actualizata cu succes!");
+            return "redirect:/rezervari";
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("error", e.getMessage());
+            populateFormDropdowns(model);
+            return "rezervari/form";
+        }
     }
 
     @PostMapping("/{id}/delete")

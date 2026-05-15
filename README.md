@@ -168,13 +168,13 @@ erDiagram
 
 ## Roluri și permisiuni
 
-| Rol | Acces |
-|-----|-------|
-| `ADMIN` | Toate paginile, inclusiv `/inventar-camere/**` și `/angajati/**` |
-| `RECEPTIONER` | `/angajati/**`, `/facturi/**`, plus paginile de baza |
-| `USER` | Hoteluri, oaspeti, rezervari, servicii |
+| Rol | Acces exclusiv | Acces comun cu RECEPTIONER |
+|-----|---------------|---------------------------|
+| `ADMIN` | `/hoteluri/**`, `/angajati/**`, `/inventar-camere/**`, `/tipuri-camere/**` | `/rezervari/**`, `/oaspeti/**`, `/facturi/**`, `/servicii/**`, `/rezervare-servicii/**` |
+| `RECEPTIONER` | — | `/rezervari/**`, `/oaspeti/**`, `/facturi/**`, `/servicii/**`, `/rezervare-servicii/**` |
 
-**Cont admin implicit:** `admin` / `admin123`
+**Cont admin implicit:** `admin` / `admin123`  
+**Cont receptioner implicit:** `receptioner` / `receptioner123`
 
 ## Multi-Environment Configuration
 
@@ -198,8 +198,8 @@ Criterii de sortare: `nume`, `stele`, `oras`, `checkIn`, `checkOut`, `status`, `
 mvn test
 ```
 
-- **Unit tests** (Mockito): `HotelServiceTest`, `RezervareServiceTest`, `OaspeteServiceTest`
-- **Integration tests** (H2 + MockMvc): `HotelIntegrationTest`, `OaspeteIntegrationTest`, `SecurityIntegrationTest`
+- **Unit tests** (Mockito): `HotelServiceTest`, `RezervareServiceTest`, `OaspeteServiceTest`, `FacturaServiceTest`
+- **Integration tests** (H2 real DB): `HotelIntegrationTest`, `OaspeteIntegrationTest`, `SecurityIntegrationTest`, `RezervareIntegrationTest`
 
 ## Logging
 

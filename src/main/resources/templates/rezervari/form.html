@@ -18,6 +18,7 @@
                     <h4 class="mb-0" th:text="${rezervare.id != null} ? 'Editeaza rezervare' : 'Rezervare noua'"></h4>
                 </div>
                 <div class="card-body">
+                    <div th:replace="~{fragments/messages :: messages}"></div>
                     <form th:action="${rezervare.id != null} ? @{/rezervari/{id}/edit(id=${rezervare.id})} : @{/rezervari/nou}"
                           th:object="${rezervare}" method="post" class="needs-validation" novalidate>
 
@@ -64,6 +65,16 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
+                                <label class="form-label">Check-in <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control"
+                                       th:field="*{checkIn}"
+                                       th:classappend="${#fields.hasErrors('checkIn')} ? 'is-invalid'"
+                                       required>
+                                <div class="invalid-feedback"
+                                     th:if="${#fields.hasErrors('checkIn')}" th:errors="*{checkIn}">Eroare</div>
+                                <div class="invalid-feedback" th:unless="${#fields.hasErrors('checkIn')}">Data check-in este obligatorie.</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
                                 <label class="form-label">Check-out <span class="text-danger">*</span></label>
                                 <input type="date" class="form-control"
                                        th:field="*{checkOut}"
@@ -73,6 +84,8 @@
                                      th:if="${#fields.hasErrors('checkOut')}" th:errors="*{checkOut}">Eroare</div>
                                 <div class="invalid-feedback" th:unless="${#fields.hasErrors('checkOut')}">Data check-out este obligatorie.</div>
                             </div>
+                        </div>
+                        <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Nr. persoane</label>
                                 <input type="number" class="form-control"

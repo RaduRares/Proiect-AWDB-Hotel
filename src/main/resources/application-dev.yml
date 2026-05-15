@@ -1,9 +1,9 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/hotel_dev
+    url: jdbc:postgresql://localhost:5433/hotel_management
     driver-class-name: org.postgresql.Driver
     username: postgres
-    password: postgres
+    password: ajutorparolamanagement
   jpa:
     hibernate:
       ddl-auto: update

@@ -18,6 +18,7 @@
                     <h4 class="mb-0" th:text="${factura.id != null} ? 'Editeaza factura' : 'Factura noua'"></h4>
                 </div>
                 <div class="card-body">
+                    <div th:replace="~{fragments/messages :: messages}"></div>
                     <form th:action="${factura.id != null} ? @{/facturi/{id}/edit(id=${factura.id})} : @{/facturi/nou}"
                           th:object="${factura}" method="post" class="needs-validation" novalidate>
 

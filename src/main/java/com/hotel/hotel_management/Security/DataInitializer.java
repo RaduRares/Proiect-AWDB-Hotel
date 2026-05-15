@@ -42,6 +42,10 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+        if (rolRepository.count() > 0) {
+            log.info("Demo data already present, skipping initialization.");
+            return;
+        }
         log.info("Initializing demo data...");
 
         // Roles

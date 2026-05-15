@@ -1,5 +1,6 @@
 package com.hotel.hotel_management.Services;
 
+import com.hotel.hotel_management.Exception.ResourceNotFoundException;
 import com.hotel.hotel_management.Models.Angajat;
 import com.hotel.hotel_management.Repositories.AngajatRepository;
 import org.slf4j.Logger;
@@ -35,7 +36,7 @@ public class AngajatService {
         return angajatRepository.findById(id)
                 .orElseThrow(() -> {
                     log.error("Employee not found with id: {}", id);
-                    return new RuntimeException("Angajatul cu id-ul " + id + " nu a fost gasit");
+                    return new ResourceNotFoundException("Angajat", id);
                 });
     }
 

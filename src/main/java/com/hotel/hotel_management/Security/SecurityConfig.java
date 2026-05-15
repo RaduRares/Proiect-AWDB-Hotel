@@ -16,12 +16,26 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
+                // Resurse publice
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                 .requestMatchers("/login", "/register").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
-                .requestMatchers("/angajati/**").hasAnyRole("ADMIN", "RECEPTIONER")
-                .requestMatchers("/facturi/**").hasAnyRole("ADMIN", "RECEPTIONER")
+
+                // Doar ADMIN: structura hotel, angajati, inventar, tipuri camere, utilizatori
+                .requestMatchers("/hoteluri/**").hasRole("ADMIN")
+                .requestMatchers("/angajati/**").hasRole("ADMIN")
                 .requestMatchers("/inventar-camere/**").hasRole("ADMIN")
+                .requestMatchers("/tipuri-camere/**").hasRole("ADMIN")
+                .requestMatchers("/utilizatori/**").hasRole("ADMIN")
+
+                // ADMIN + RECEPTIONER: operatiuni zilnice
+                .requestMatchers("/rezervari/**").hasAnyRole("ADMIN", "RECEPTIONER")
+                .requestMatchers("/oaspeti/**").hasAnyRole("ADMIN", "RECEPTIONER")
+                .requestMatchers("/facturi/**").hasAnyRole("ADMIN", "RECEPTIONER")
+                .requestMatchers("/servicii/**").hasAnyRole("ADMIN", "RECEPTIONER")
+                .requestMatchers("/rezervare-servicii/**").hasAnyRole("ADMIN", "RECEPTIONER")
+
+                // Orice utilizator autentificat: home
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
@@ -36,9 +50,11 @@ public class SecurityConfig {
             .rememberMe(rm -> rm
                 .key("hotel-management-secret-key")
                 .tokenValiditySeconds(1209600)
+            )
+            .exceptionHandling(ex -> ex
+                .accessDeniedPage("/error/403")
             );
 
-        // H2 console support
         http.csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"));
         http.headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));
 

@@ -1,5 +1,6 @@
 package com.hotel.hotel_management.Services;
 
+import com.hotel.hotel_management.Exception.ResourceNotFoundException;
 import com.hotel.hotel_management.Models.Hotel;
 import com.hotel.hotel_management.Repositories.HotelRepository;
 import org.slf4j.Logger;
@@ -41,7 +42,7 @@ public class HotelService {
         return hotelRepository.findById(id)
                 .orElseThrow(() -> {
                     log.error("Hotel not found with id: {}", id);
-                    return new RuntimeException("Hotelul cu id-ul " + id + " nu a fost gasit");
+                    return new ResourceNotFoundException("Hotel", id);
                 });
     }
 

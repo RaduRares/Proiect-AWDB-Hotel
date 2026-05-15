@@ -1,5 +1,6 @@
 package com.hotel.hotel_management.Services;
 
+import com.hotel.hotel_management.Exception.ResourceNotFoundException;
 import com.hotel.hotel_management.Models.Oaspete;
 import com.hotel.hotel_management.Repositories.OaspeteRepository;
 import org.slf4j.Logger;
@@ -41,7 +42,7 @@ public class OaspeteService {
         return oaspeteRepository.findById(id)
                 .orElseThrow(() -> {
                     log.error("Guest not found with id: {}", id);
-                    return new RuntimeException("Oaspetele cu id-ul " + id + " nu a fost gasit");
+                    return new ResourceNotFoundException("Oaspete", id);
                 });
     }
 

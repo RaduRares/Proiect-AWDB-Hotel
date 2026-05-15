@@ -1,5 +1,6 @@
 package com.hotel.hotel_management.Services;
 
+import com.hotel.hotel_management.Exception.ResourceNotFoundException;
 import com.hotel.hotel_management.Models.TipCamera;
 import com.hotel.hotel_management.Repositories.TipCameraRepository;
 import org.slf4j.Logger;
@@ -41,7 +42,7 @@ public class TipCameraService {
         return tipCameraRepository.findById(id)
                 .orElseThrow(() -> {
                     log.error("Room type not found with id: {}", id);
-                    return new RuntimeException("Tipul de camera cu id-ul " + id + " nu a fost gasit");
+                    return new ResourceNotFoundException("TipCamera", id);
                 });
     }
 
