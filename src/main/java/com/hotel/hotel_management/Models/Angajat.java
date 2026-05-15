@@ -6,7 +6,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import lombok.*;
-import org.hibernate.validator.constraints.br.CPF;
 
 @Entity
 @Table(name="angajat")
