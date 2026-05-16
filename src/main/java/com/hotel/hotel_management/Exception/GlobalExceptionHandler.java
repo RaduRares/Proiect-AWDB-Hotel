@@ -7,6 +7,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -18,6 +20,12 @@ public class GlobalExceptionHandler {
     public String handleNotFound(ResourceNotFoundException ex, Model model) {
         log.error("Resource not found: {}", ex.getMessage());
         model.addAttribute("eroare", ex.getMessage());
+        return "error/404";
+    }
+
+    @ExceptionHandler({NoResourceFoundException.class, NoHandlerFoundException.class})
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String handleNoResource(Exception ex, Model model) {
         return "error/404";
     }
 

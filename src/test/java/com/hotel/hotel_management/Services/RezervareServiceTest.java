@@ -1,7 +1,9 @@
 package com.hotel.hotel_management.Services;
 
+import com.hotel.hotel_management.Models.NrCurentHotelTipCamera;
 import com.hotel.hotel_management.Models.Rezervare;
 import com.hotel.hotel_management.Models.TipCamera;
+import com.hotel.hotel_management.Repositories.NrCurentHotelTipCameraRepository;
 import com.hotel.hotel_management.Repositories.RezervareRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,11 +28,15 @@ class RezervareServiceTest {
     @Mock
     private RezervareRepository rezervareRepository;
 
+    @Mock
+    private NrCurentHotelTipCameraRepository nrCurentRepo;
+
     @InjectMocks
     private RezervareService rezervareService;
 
     private Rezervare rezervare;
     private TipCamera tipCamera;
+    private NrCurentHotelTipCamera nrCurent;
 
     @BeforeEach
     void setUp() {
@@ -49,6 +55,15 @@ class RezervareServiceTest {
                 .nrPersoane(2)
                 .tipCamera(tipCamera)
                 .build();
+
+        nrCurent = NrCurentHotelTipCamera.builder()
+                .id(1L)
+                .numarTotal(1)
+                .build();
+
+        // numarTotal=1: overlap=0 → ok; overlap=1 → blocat
+        lenient().when(nrCurentRepo.findByTipCameraId(anyLong()))
+                .thenReturn(Optional.of(nrCurent));
     }
 
     // --- CRUD de baza ---

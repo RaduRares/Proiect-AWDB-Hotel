@@ -26,6 +26,7 @@
                     <th>Username</th>
                     <th>Email</th>
                     <th>Rol curent</th>
+                    <th>Hotel asignat</th>
                     <th>Creat la</th>
                     <th>Actiuni</th>
                 </tr>
@@ -40,16 +41,37 @@
                               th:text="${r.nume + (rStat.last ? '' : ', ')}"
                               class="badge bg-secondary"></span>
                     </td>
+                    <td>
+                        <span th:if="${u.hotel != null}"
+                              th:text="${u.hotel.nume}"
+                              class="badge bg-info text-dark"></span>
+                        <span th:if="${u.hotel == null}"
+                              class="text-muted small">—</span>
+                    </td>
                     <td th:text="${#temporals.format(u.creatLa, 'dd.MM.yyyy HH:mm')}"></td>
                     <td>
-                        <form th:action="@{/utilizatori/{id}/rol(id=${u.id})}" method="post" class="d-inline-flex gap-1">
+                        <!-- Schimba rol -->
+                        <form th:action="@{/utilizatori/{id}/rol(id=${u.id})}" method="post" class="d-inline-flex gap-1 mb-1">
                             <select name="numRol" class="form-select form-select-sm" style="width:auto">
                                 <option th:each="r : ${roluri}"
                                         th:value="${r.nume}"
-                                        th:text="${r.nume}"></option>
+                                        th:text="${r.nume}"
+                                        th:selected="${u.roluri.contains(r)}"></option>
                             </select>
-                            <button type="submit" class="btn btn-sm btn-outline-primary">Seteaza</button>
+                            <button type="submit" class="btn btn-sm btn-outline-primary">Rol</button>
                         </form>
+                        <!-- Asigneaza hotel -->
+                        <form th:action="@{/utilizatori/{id}/hotel(id=${u.id})}" method="post" class="d-inline-flex gap-1 mb-1">
+                            <select name="hotelId" class="form-select form-select-sm" style="width:auto">
+                                <option value="">— fara hotel —</option>
+                                <option th:each="h : ${hoteluri}"
+                                        th:value="${h.id}"
+                                        th:text="${h.nume}"
+                                        th:selected="${u.hotel != null and u.hotel.id == h.id}"></option>
+                            </select>
+                            <button type="submit" class="btn btn-sm btn-outline-info">Hotel</button>
+                        </form>
+                        <!-- Sterge -->
                         <form th:action="@{/utilizatori/{id}/delete(id=${u.id})}" method="post" class="d-inline"
                               onsubmit="return confirm('Stergi utilizatorul ' + /*[[${u.username}]]*/ '' + '?')">
                             <button type="submit" class="btn btn-sm btn-outline-danger ms-1">Sterge</button>
@@ -57,7 +79,7 @@
                     </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(users)}">
-                    <td colspan="6" class="text-center text-muted py-3">Niciun utilizator gasit.</td>
+                    <td colspan="7" class="text-center text-muted py-3">Niciun utilizator gasit.</td>
                 </tr>
                 </tbody>
             </table>

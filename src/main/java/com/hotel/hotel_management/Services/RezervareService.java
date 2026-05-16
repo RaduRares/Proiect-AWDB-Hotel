@@ -3,6 +3,7 @@ package com.hotel.hotel_management.Services;
 import com.hotel.hotel_management.Exception.BusinessValidationException;
 import com.hotel.hotel_management.Exception.ResourceNotFoundException;
 import com.hotel.hotel_management.Models.Rezervare;
+import com.hotel.hotel_management.Repositories.NrCurentHotelTipCameraRepository;
 import com.hotel.hotel_management.Repositories.RezervareRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,12 +20,15 @@ public class RezervareService {
 
     private static final Logger log = LoggerFactory.getLogger(RezervareService.class);
     private final RezervareRepository rezervareRepository;
+    private final NrCurentHotelTipCameraRepository nrCurentRepo;
 
     private static final List<Rezervare.StatusRezervare> INACTIVE_STATUSES =
             List.of(Rezervare.StatusRezervare.ANULATA, Rezervare.StatusRezervare.CHECKED_OUT);
 
-    public RezervareService(RezervareRepository rezervareRepository) {
+    public RezervareService(RezervareRepository rezervareRepository,
+                            NrCurentHotelTipCameraRepository nrCurentRepo) {
         this.rezervareRepository = rezervareRepository;
+        this.nrCurentRepo = nrCurentRepo;
     }
 
     public Page<Rezervare> findAll(Pageable pageable) {
@@ -35,6 +39,16 @@ public class RezervareService {
     public Page<Rezervare> findByStatus(Rezervare.StatusRezervare status, Pageable pageable) {
         log.debug("Finding reservations by status: {}", status);
         return rezervareRepository.findByStatus(status, pageable);
+    }
+
+    public Page<Rezervare> findByHotelId(Long hotelId, Pageable pageable) {
+        log.debug("Finding reservations for hotel: {}", hotelId);
+        return rezervareRepository.findByHotelId(hotelId, pageable);
+    }
+
+    public Page<Rezervare> findByHotelIdAndStatus(Long hotelId, Rezervare.StatusRezervare status, Pageable pageable) {
+        log.debug("Finding reservations for hotel: {} status: {}", hotelId, status);
+        return rezervareRepository.findByHotelIdAndStatus(hotelId, status, pageable);
     }
 
     public Rezervare findById(Long id) {
@@ -74,6 +88,15 @@ public class RezervareService {
         if (rezervare.getTipCamera() == null || rezervare.getTipCamera().getId() == null) return;
         if (rezervare.getCheckIn() == null || rezervare.getCheckOut() == null) return;
 
+        int numarTotal = nrCurentRepo.findByTipCameraId(rezervare.getTipCamera().getId())
+                .map(n -> n.getNumarTotal())
+                .orElse(0);
+
+        if (numarTotal == 0) {
+            throw new BusinessValidationException(
+                    "Nu este configurat numarul de camere pentru tipul selectat. Contactati administratorul.");
+        }
+
         long overlap;
         if (rezervare.getId() == null) {
             overlap = rezervareRepository.countOverlap(
@@ -90,10 +113,11 @@ public class RezervareService {
                     INACTIVE_STATUSES);
         }
 
-        if (overlap > 0) {
+        if (overlap >= numarTotal) {
             throw new BusinessValidationException(
                     "Tipul de camera selectat nu este disponibil in perioada " +
-                    rezervare.getCheckIn() + " - " + rezervare.getCheckOut() + ".");
+                    rezervare.getCheckIn() + " - " + rezervare.getCheckOut() +
+                    ". Toate camerele (" + numarTotal + ") sunt ocupate.");
         }
     }
 }

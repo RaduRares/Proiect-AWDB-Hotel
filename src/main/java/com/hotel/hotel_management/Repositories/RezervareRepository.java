@@ -19,6 +19,8 @@ public interface RezervareRepository extends JpaRepository<Rezervare, Long> {
 
     Page<Rezervare> findByStatus(Rezervare.StatusRezervare status, Pageable pageable);
 
+    Page<Rezervare> findByHotelIdAndStatus(Long hotelId, Rezervare.StatusRezervare status, Pageable pageable);
+
     @Query("SELECT COUNT(r) FROM Rezervare r WHERE r.tipCamera.id = :tipCameraId " +
            "AND r.status NOT IN :excludedStatuses " +
            "AND r.checkIn < :checkOut AND r.checkOut > :checkIn")

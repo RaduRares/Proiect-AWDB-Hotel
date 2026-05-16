@@ -1,6 +1,9 @@
 package com.hotel.hotel_management.Controllers;
 
+import com.hotel.hotel_management.Models.Hotel;
 import com.hotel.hotel_management.Models.Rezervare;
+import com.hotel.hotel_management.Models.User;
+import com.hotel.hotel_management.Repositories.UserRepository;
 import com.hotel.hotel_management.Services.*;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -8,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -23,13 +27,23 @@ public class RezervareController {
     private final HotelService hotelService;
     private final OaspeteService oaspeteService;
     private final TipCameraService tipCameraService;
+    private final UserRepository userRepository;
 
     public RezervareController(RezervareService rezervareService, HotelService hotelService,
-                               OaspeteService oaspeteService, TipCameraService tipCameraService) {
+                               OaspeteService oaspeteService, TipCameraService tipCameraService,
+                               UserRepository userRepository) {
         this.rezervareService = rezervareService;
         this.hotelService = hotelService;
         this.oaspeteService = oaspeteService;
         this.tipCameraService = tipCameraService;
+        this.userRepository = userRepository;
+    }
+
+    private Hotel getCurrentUserHotel(Authentication auth) {
+        if (auth == null) return null;
+        return userRepository.findByUsername(auth.getName())
+                .map(User::getHotel)
+                .orElse(null);
     }
 
     @GetMapping
@@ -38,15 +52,30 @@ public class RezervareController {
                        @RequestParam(defaultValue = "id") String sortBy,
                        @RequestParam(defaultValue = "asc") String sortDir,
                        @RequestParam(required = false) String status,
-                       Model model) {
+                       Authentication auth, Model model) {
         Sort sort = sortDir.equals("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Hotel userHotel = getCurrentUserHotel(auth);
         Page<Rezervare> pageResult;
-        if (status != null && !status.isBlank()) {
-            pageResult = rezervareService.findByStatus(
-                    Rezervare.StatusRezervare.valueOf(status), PageRequest.of(page, size, sort));
+
+        if (userHotel != null) {
+            if (status != null && !status.isBlank()) {
+                pageResult = rezervareService.findByHotelIdAndStatus(
+                        userHotel.getId(),
+                        Rezervare.StatusRezervare.valueOf(status),
+                        PageRequest.of(page, size, sort));
+            } else {
+                pageResult = rezervareService.findByHotelId(
+                        userHotel.getId(), PageRequest.of(page, size, sort));
+            }
         } else {
-            pageResult = rezervareService.findAll(PageRequest.of(page, size, sort));
+            if (status != null && !status.isBlank()) {
+                pageResult = rezervareService.findByStatus(
+                        Rezervare.StatusRezervare.valueOf(status), PageRequest.of(page, size, sort));
+            } else {
+                pageResult = rezervareService.findAll(PageRequest.of(page, size, sort));
+            }
         }
+
         model.addAttribute("page", pageResult);
         model.addAttribute("sortBy", sortBy);
         model.addAttribute("sortDir", sortDir);
@@ -56,19 +85,23 @@ public class RezervareController {
     }
 
     @GetMapping("/nou")
-    public String createForm(Model model) {
+    public String createForm(Authentication auth, Model model) {
         model.addAttribute("rezervare", new Rezervare());
-        populateFormDropdowns(model);
+        populateFormDropdowns(auth, model);
         return "rezervari/form";
     }
 
     @PostMapping("/nou")
     public String create(@Valid @ModelAttribute("rezervare") Rezervare rezervare,
-                         BindingResult result, Model model,
+                         BindingResult result, Authentication auth, Model model,
                          RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
-            populateFormDropdowns(model);
+            populateFormDropdowns(auth, model);
             return "rezervari/form";
+        }
+        Hotel userHotel = getCurrentUserHotel(auth);
+        if (userHotel != null) {
+            rezervare.setHotel(userHotel);
         }
         try {
             rezervareService.save(rezervare);
@@ -76,7 +109,7 @@ public class RezervareController {
             return "redirect:/rezervari";
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
-            populateFormDropdowns(model);
+            populateFormDropdowns(auth, model);
             return "rezervari/form";
         }
     }
@@ -88,29 +121,33 @@ public class RezervareController {
     }
 
     @GetMapping("/{id}/edit")
-    public String editForm(@PathVariable Long id, Model model) {
+    public String editForm(@PathVariable Long id, Authentication auth, Model model) {
         model.addAttribute("rezervare", rezervareService.findById(id));
-        populateFormDropdowns(model);
+        populateFormDropdowns(auth, model);
         return "rezervari/form";
     }
 
     @PostMapping("/{id}/edit")
     public String update(@PathVariable Long id,
                          @Valid @ModelAttribute("rezervare") Rezervare rezervare,
-                         BindingResult result, Model model,
+                         BindingResult result, Authentication auth, Model model,
                          RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
-            populateFormDropdowns(model);
+            populateFormDropdowns(auth, model);
             return "rezervari/form";
         }
         rezervare.setId(id);
+        Hotel userHotel = getCurrentUserHotel(auth);
+        if (userHotel != null) {
+            rezervare.setHotel(userHotel);
+        }
         try {
             rezervareService.save(rezervare);
             redirectAttributes.addFlashAttribute("success", "Rezervarea a fost actualizata cu succes!");
             return "redirect:/rezervari";
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
-            populateFormDropdowns(model);
+            populateFormDropdowns(auth, model);
             return "rezervari/form";
         }
     }
@@ -122,10 +159,17 @@ public class RezervareController {
         return "redirect:/rezervari";
     }
 
-    private void populateFormDropdowns(Model model) {
-        model.addAttribute("hoteluri", hotelService.findAll());
+    private void populateFormDropdowns(Authentication auth, Model model) {
+        Hotel userHotel = getCurrentUserHotel(auth);
+        model.addAttribute("userHotel", userHotel);
+        if (userHotel != null) {
+            model.addAttribute("hoteluri", hotelService.findAll());
+            model.addAttribute("tipuriCamere", tipCameraService.findByHotelId(userHotel.getId()));
+        } else {
+            model.addAttribute("hoteluri", hotelService.findAll());
+            model.addAttribute("tipuriCamere", tipCameraService.findAll());
+        }
         model.addAttribute("oaspeti", oaspeteService.findAll());
-        model.addAttribute("tipuriCamere", tipCameraService.findAll());
         model.addAttribute("statusuri", Rezervare.StatusRezervare.values());
     }
 }

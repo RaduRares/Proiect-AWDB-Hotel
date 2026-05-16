@@ -44,4 +44,8 @@ public class User {
     )
     @Builder.Default
     private Set<Rol> roluri = new HashSet<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hotel_id")
+    private Hotel hotel;
 }
