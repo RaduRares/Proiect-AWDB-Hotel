@@ -3,6 +3,7 @@ package com.hotel.hotel_management.Controllers;
 import com.hotel.hotel_management.Models.Hotel;
 import com.hotel.hotel_management.Models.Rezervare;
 import com.hotel.hotel_management.Models.User;
+import java.util.List;
 import com.hotel.hotel_management.Repositories.UserRepository;
 import com.hotel.hotel_management.Services.*;
 import jakarta.validation.Valid;
@@ -57,20 +58,26 @@ public class RezervareController {
         Hotel userHotel = getCurrentUserHotel(auth);
         Page<Rezervare> pageResult;
 
+        Rezervare.StatusRezervare statusEnum = null;
+        if (status != null && !status.isBlank()) {
+            try {
+                statusEnum = Rezervare.StatusRezervare.valueOf(status);
+            } catch (IllegalArgumentException e) {
+                log.warn("Invalid status filter: {}", status);
+            }
+        }
+
         if (userHotel != null) {
-            if (status != null && !status.isBlank()) {
+            if (statusEnum != null) {
                 pageResult = rezervareService.findByHotelIdAndStatus(
-                        userHotel.getId(),
-                        Rezervare.StatusRezervare.valueOf(status),
-                        PageRequest.of(page, size, sort));
+                        userHotel.getId(), statusEnum, PageRequest.of(page, size, sort));
             } else {
                 pageResult = rezervareService.findByHotelId(
                         userHotel.getId(), PageRequest.of(page, size, sort));
             }
         } else {
-            if (status != null && !status.isBlank()) {
-                pageResult = rezervareService.findByStatus(
-                        Rezervare.StatusRezervare.valueOf(status), PageRequest.of(page, size, sort));
+            if (statusEnum != null) {
+                pageResult = rezervareService.findByStatus(statusEnum, PageRequest.of(page, size, sort));
             } else {
                 pageResult = rezervareService.findAll(PageRequest.of(page, size, sort));
             }
@@ -163,7 +170,7 @@ public class RezervareController {
         Hotel userHotel = getCurrentUserHotel(auth);
         model.addAttribute("userHotel", userHotel);
         if (userHotel != null) {
-            model.addAttribute("hoteluri", hotelService.findAll());
+            model.addAttribute("hoteluri", List.of(userHotel));
             model.addAttribute("tipuriCamere", tipCameraService.findByHotelId(userHotel.getId()));
         } else {
             model.addAttribute("hoteluri", hotelService.findAll());

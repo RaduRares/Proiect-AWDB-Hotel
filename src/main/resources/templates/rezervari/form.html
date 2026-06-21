@@ -88,7 +88,7 @@
                                        required>
                                 <div class="invalid-feedback"
                                      th:if="${#fields.hasErrors('checkOut')}" th:errors="*{checkOut}">Eroare</div>
-                                <div class="invalid-feedback" th:unless="${#fields.hasErrors('checkOut')}">Data check-out este obligatorie.</div>
+                                <div class="invalid-feedback" th:unless="${#fields.hasErrors('checkOut')}">Data check-out este obligatorie si trebuie sa fie dupa check-in.</div>
                             </div>
                         </div>
                         <div class="row">

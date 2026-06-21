@@ -1,18 +1,93 @@
-version: '3.8'
-
 services:
+
   postgres:
-    image: postgres:16
-    container_name: hotel_postgres
+    image: postgres:16-alpine
+    container_name: hotel-postgres
     environment:
       POSTGRES_DB: hotel_management
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ajutorparolamanagement
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-hotelpassword}
     ports:
       - "5433:5432"
     volumes:
-      - hotel_postgres_data:/var/lib/postgresql/data
-    restart: unless-stopped
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - hotel-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  eureka-server:
+    build:
+      context: .
+      dockerfile: eureka-server/Dockerfile
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - hotel-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8761/actuator/health | grep UP || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  hotel-service:
+    build:
+      context: .
+      dockerfile: hotel-service/Dockerfile
+    container_name: hotel-service
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/hotel_management
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-hotelpassword}
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - hotel-network
+
+  user-service:
+    build:
+      context: .
+      dockerfile: user-service/Dockerfile
+    container_name: user-service
+    ports:
+      - "8081:8081"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - hotel-network
+
+  notif-service:
+    build:
+      context: .
+      dockerfile: notif-service/Dockerfile
+    container_name: notif-service
+    ports:
+      - "8083:8083"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - hotel-network
 
 volumes:
-  hotel_postgres_data:
+  postgres_data:
+
+networks:
+  hotel-network:
+    driver: bridge

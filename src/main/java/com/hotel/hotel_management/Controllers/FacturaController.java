@@ -59,9 +59,17 @@ public class FacturaController {
             model.addAttribute("statusuri", Factura.StatusPlata.values());
             return "facturi/form";
         }
-        facturaService.save(factura);
-        redirectAttributes.addFlashAttribute("success", "Factura a fost creata cu succes!");
-        return "redirect:/facturi";
+        try {
+            facturaService.save(factura);
+            redirectAttributes.addFlashAttribute("success", "Factura a fost creata cu succes!");
+            return "redirect:/facturi";
+        } catch (Exception e) {
+            log.error("Error saving factura: {}", e.getMessage());
+            model.addAttribute("error", "Eroare la salvare: " + e.getMessage());
+            model.addAttribute("rezervari", rezervareService.findAll(PageRequest.of(0, 100)).getContent());
+            model.addAttribute("statusuri", Factura.StatusPlata.values());
+            return "facturi/form";
+        }
     }
 
     @GetMapping("/{id}")
@@ -89,9 +97,17 @@ public class FacturaController {
             return "facturi/form";
         }
         factura.setId(id);
-        facturaService.save(factura);
-        redirectAttributes.addFlashAttribute("success", "Factura a fost actualizata cu succes!");
-        return "redirect:/facturi";
+        try {
+            facturaService.save(factura);
+            redirectAttributes.addFlashAttribute("success", "Factura a fost actualizata cu succes!");
+            return "redirect:/facturi";
+        } catch (Exception e) {
+            log.error("Error updating factura {}: {}", id, e.getMessage());
+            model.addAttribute("error", "Eroare la actualizare: " + e.getMessage());
+            model.addAttribute("rezervari", rezervareService.findAll(PageRequest.of(0, 100)).getContent());
+            model.addAttribute("statusuri", Factura.StatusPlata.values());
+            return "facturi/form";
+        }
     }
 
     @PostMapping("/{id}/delete")
