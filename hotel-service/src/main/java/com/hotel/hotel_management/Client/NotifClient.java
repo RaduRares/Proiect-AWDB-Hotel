@@ -4,7 +4,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(name = "notif-service", fallback = NotifClientFallback.class)
+@FeignClient(name = "notif-service", url = "${notif.service.url:http://localhost:8083}", fallback = NotifClientFallback.class)
 public interface NotifClient {
 
     @PostMapping("/api/notificari/rezervare-creata")
