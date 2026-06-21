@@ -37,7 +37,7 @@
                     <a class="nav-link" th:href="@{/utilizatori}">Utilizatori</a>
                 </li>
             </ul>
-            <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center" sec:authorize="isAuthenticated()">
                 <span class="text-light me-3" sec:authentication="name">User</span>
                 <form th:action="@{/logout}" method="post" class="mb-0">
                     <button type="submit" class="btn btn-outline-light btn-sm">Deconectare</button>

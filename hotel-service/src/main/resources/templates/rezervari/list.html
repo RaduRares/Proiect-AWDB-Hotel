@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Rezervari - Hotel Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main class="container mt-4">
+    <div th:replace="~{fragments/messages :: messages}"></div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Rezervari</h2>
+        <a th:href="@{/rezervari/nou}" class="btn btn-primary">+ Rezervare noua</a>
+    </div>
+
+    <!-- Status filter -->
+    <form th:action="@{/rezervari}" method="get" class="mb-3 d-flex gap-2 align-items-center flex-wrap">
+        <label class="form-label mb-0">Filtru status:</label>
+        <select class="form-select form-select-sm" name="status" style="width:auto"
+                onchange="this.form.submit()">
+            <option value="">Toate</option>
+            <option th:each="s : ${statusuri}"
+                    th:value="${s}" th:text="${s}"
+                    th:selected="${s.name() == status}">
+            </option>
+        </select>
+        <input type="hidden" name="size" th:value="${page.size}">
+        <a th:href="@{/rezervari}" class="btn btn-sm btn-outline-secondary" th:if="${status}">Sterge filtru</a>
+    </form>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-striped table-hover mb-0">
+                <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Oaspete</th>
+                    <th>Hotel</th>
+                    <th>Tip Camera</th>
+                    <th>
+                        <a th:href="@{/rezervari(page=${page.number}, size=${page.size},
+                            sortBy='checkOut', sortDir=${sortBy == 'checkOut' && sortDir == 'asc'} ? 'desc' : 'asc',
+                            status=${status})}" class="text-white text-decoration-none">
+                            Check-out <span th:if="${sortBy == 'checkOut'}" th:text="${sortDir == 'asc'} ? '▲' : '▼'"></span>
+                        </a>
+                    </th>
+                    <th>
+                        <a th:href="@{/rezervari(page=${page.number}, size=${page.size},
+                            sortBy='status', sortDir=${sortBy == 'status' && sortDir == 'asc'} ? 'desc' : 'asc',
+                            status=${status})}" class="text-white text-decoration-none">
+                            Status <span th:if="${sortBy == 'status'}" th:text="${sortDir == 'asc'} ? '▲' : '▼'"></span>
+                        </a>
+                    </th>
+                    <th>Actiuni</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${page.totalElements == 0}">
+                    <td colspan="7" class="text-center text-muted py-4">Nu exista rezervari.</td>
+                </tr>
+                <tr th:each="r : ${page.content}">
+                    <td th:text="${r.id}"></td>
+                    <td th:text="${r.oaspete.nume}"></td>
+                    <td th:text="${r.hotel.nume}"></td>
+                    <td th:text="${r.tipCamera.nume}"></td>
+                    <td th:text="${r.checkOut}"></td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${r.status.name() == 'CONFIRMATA'} ? 'bg-success' :
+                                             (${r.status.name() == 'ANULATA'} ? 'bg-danger' :
+                                             (${r.status.name() == 'CHECKED_IN'} ? 'bg-primary' :
+                                             (${r.status.name() == 'CHECKED_OUT'} ? 'bg-info' : 'bg-warning')))"
+                              th:text="${r.status}"></span>
+                    </td>
+                    <td class="text-nowrap">
+                        <a th:href="@{/rezervari/{id}(id=${r.id})}" class="btn btn-sm btn-outline-info me-1">Detalii</a>
+
+                        <!-- Check-in: CONFIRMATA sau IN_ASTEPTARE -->
+                        <form th:if="${r.status.name() == 'CONFIRMATA' or r.status.name() == 'IN_ASTEPTARE'}"
+                              th:action="@{/rezervari/{id}/schimba-status(id=${r.id})}" method="post" class="d-inline me-1">
+                            <input type="hidden" name="status" value="CHECKED_IN">
+                            <button type="submit" class="btn btn-sm btn-primary">Check-in</button>
+                        </form>
+
+                        <!-- Check-out + auto-factura: CHECKED_IN -->
+                        <form th:if="${r.status.name() == 'CHECKED_IN'}"
+                              th:action="@{/rezervari/{id}/schimba-status(id=${r.id})}" method="post" class="d-inline me-1">
+                            <input type="hidden" name="status" value="CHECKED_OUT">
+                            <button type="submit" class="btn btn-sm btn-success">Check-out</button>
+                        </form>
+
+                        <!-- Anuleaza: orice status activ -->
+                        <form th:if="${r.status.name() != 'ANULATA' and r.status.name() != 'CHECKED_OUT'}"
+                              th:action="@{/rezervari/{id}/schimba-status(id=${r.id})}" method="post" class="d-inline me-1">
+                            <input type="hidden" name="status" value="ANULATA">
+                            <button type="submit" class="btn btn-sm btn-outline-danger"
+                                    th:onclick="|return confirm('Anulati rezervarea #${r.id}?')|">Anuleaza</button>
+                        </form>
+
+                        <!-- Editeaza: doar pentru rezervari active -->
+                        <a th:if="${r.status.name() != 'CHECKED_OUT' and r.status.name() != 'ANULATA'}"
+                           th:href="@{/rezervari/{id}/edit(id=${r.id})}" class="btn btn-sm btn-outline-warning me-1">Editeaza</a>
+
+                        <button type="button" class="btn btn-sm btn-outline-secondary"
+                                data-bs-toggle="modal" th:data-bs-target="'#del' + ${r.id}">Sterge</button>
+                        <div class="modal fade" th:id="'del' + ${r.id}" tabindex="-1">
+                            <div class="modal-dialog"><div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Confirmare stergere</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">Stergeti rezervarea <strong th:text="'#' + ${r.id}">#1</strong>?</div>
+                                <div class="modal-footer">
+                                    <button class="btn btn-secondary" data-bs-dismiss="modal">Anuleaza</button>
+                                    <form th:action="@{/rezervari/{id}/delete(id=${r.id})}" method="post">
+                                        <button type="submit" class="btn btn-danger">Sterge</button>
+                                    </form>
+                                </div>
+                            </div></div>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/pagination :: pagination(${page}, '/rezervari')}"></div>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/validation.js}"></script>
+</body>
+</html>

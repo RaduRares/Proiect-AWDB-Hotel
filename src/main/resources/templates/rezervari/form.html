@@ -37,15 +37,21 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Hotel <span class="text-danger">*</span></label>
-                                <select class="form-select"
-                                        th:field="*{hotel.id}"
-                                        required>
-                                    <option value="">-- Selectati hotelul --</option>
-                                    <option th:each="h : ${hoteluri}"
-                                            th:value="${h.id}" th:text="${h.nume}">
-                                    </option>
-                                </select>
-                                <div class="invalid-feedback">Selectati un hotel.</div>
+                                <!-- RECEPTIONER: hotel fix, nu poate schimba -->
+                                <div th:if="${userHotel != null}">
+                                    <input type="hidden" th:name="hotel.id" th:value="${userHotel.id}">
+                                    <input type="text" class="form-control" th:value="${userHotel.nume}" readonly>
+                                </div>
+                                <!-- ADMIN: alege orice hotel -->
+                                <div th:if="${userHotel == null}">
+                                    <select class="form-select" th:field="*{hotel.id}" required>
+                                        <option value="">-- Selectati hotelul --</option>
+                                        <option th:each="h : ${hoteluri}"
+                                                th:value="${h.id}" th:text="${h.nume}">
+                                        </option>
+                                    </select>
+                                    <div class="invalid-feedback">Selectati un hotel.</div>
+                                </div>
                             </div>
                         </div>
 
@@ -82,7 +88,7 @@
                                        required>
                                 <div class="invalid-feedback"
                                      th:if="${#fields.hasErrors('checkOut')}" th:errors="*{checkOut}">Eroare</div>
-                                <div class="invalid-feedback" th:unless="${#fields.hasErrors('checkOut')}">Data check-out este obligatorie.</div>
+                                <div class="invalid-feedback" th:unless="${#fields.hasErrors('checkOut')}">Data check-out este obligatorie si trebuie sa fie dupa check-in.</div>
                             </div>
                         </div>
                         <div class="row">

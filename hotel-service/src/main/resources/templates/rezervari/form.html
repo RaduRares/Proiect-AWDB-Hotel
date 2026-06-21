@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${rezervare.id != null} ? 'Editeaza Rezervare' : 'Rezervare Noua'">Rezervare</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0" th:text="${rezervare.id != null} ? 'Editeaza rezervare' : 'Rezervare noua'"></h4>
+                </div>
+                <div class="card-body">
+                    <div th:replace="~{fragments/messages :: messages}"></div>
+                    <form th:action="${rezervare.id != null} ? @{/rezervari/{id}/edit(id=${rezervare.id})} : @{/rezervari/nou}"
+                          th:object="${rezervare}" method="post" class="needs-validation" novalidate>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Oaspete <span class="text-danger">*</span></label>
+                                <select class="form-select"
+                                        th:field="*{oaspete.id}"
+                                        required>
+                                    <option value="">-- Selectati oaspetele --</option>
+                                    <option th:each="o : ${oaspeti}"
+                                            th:value="${o.id}" th:text="${o.nume}">
+                                    </option>
+                                </select>
+                                <div class="invalid-feedback">Selectati un oaspete.</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Hotel <span class="text-danger">*</span></label>
+                                <!-- RECEPTIONER: hotel fix, nu poate schimba -->
+                                <div th:if="${userHotel != null}">
+                                    <input type="hidden" th:name="hotel.id" th:value="${userHotel.id}">
+                                    <input type="text" class="form-control" th:value="${userHotel.nume}" readonly>
+                                </div>
+                                <!-- ADMIN: alege orice hotel -->
+                                <div th:if="${userHotel == null}">
+                                    <select class="form-select" th:field="*{hotel.id}" required>
+                                        <option value="">-- Selectati hotelul --</option>
+                                        <option th:each="h : ${hoteluri}"
+                                                th:value="${h.id}" th:text="${h.nume}">
+                                        </option>
+                                    </select>
+                                    <div class="invalid-feedback">Selectati un hotel.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Tip camera <span class="text-danger">*</span></label>
+                            <select class="form-select" id="tipCameraSelect"
+                                    th:field="*{tipCamera.id}"
+                                    required>
+                                <option value="">-- Selectati tipul camerei --</option>
+                                <option th:each="tc : ${tipuriCamere}"
+                                        th:value="${tc.id}"
+                                        th:attr="data-hotel-id=${tc.hotel.id}"
+                                        th:text="${tc.hotel.nume} + ' - ' + ${tc.nume} + ' (' + ${tc.pret} + ' RON/noapte)'">
+                                </option>
+                            </select>
+                            <div class="invalid-feedback">Selectati un tip de camera.</div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Check-in <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control"
+                                       th:field="*{checkIn}"
+                                       th:classappend="${#fields.hasErrors('checkIn')} ? 'is-invalid'"
+                                       required>
+                                <div class="invalid-feedback"
+                                     th:if="${#fields.hasErrors('checkIn')}" th:errors="*{checkIn}">Eroare</div>
+                                <div class="invalid-feedback" th:unless="${#fields.hasErrors('checkIn')}">Data check-in este obligatorie.</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Check-out <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control"
+                                       th:field="*{checkOut}"
+                                       th:classappend="${#fields.hasErrors('checkOut')} ? 'is-invalid'"
+                                       required>
+                                <div class="invalid-feedback"
+                                     th:if="${#fields.hasErrors('checkOut')}" th:errors="*{checkOut}">Eroare</div>
+                                <div class="invalid-feedback" th:unless="${#fields.hasErrors('checkOut')}">Data check-out este obligatorie si trebuie sa fie dupa check-in.</div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Nr. persoane</label>
+                                <input type="number" class="form-control"
+                                       th:field="*{nrPersoane}"
+                                       min="1" value="1">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" th:field="*{status}">
+                                <option th:each="s : ${statusuri}"
+                                        th:value="${s}" th:text="${s}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Observatii</label>
+                            <textarea class="form-control" th:field="*{observatii}" rows="3" maxlength="500"></textarea>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">Salveaza</button>
+                            <a th:href="@{/rezervari}" class="btn btn-outline-secondary">Anuleaza</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/validation.js}"></script>
+<script th:if="${userHotel == null}">
+    (function () {
+        const hotelSel = document.querySelector('[name="hotel.id"]');
+        const roomSel  = document.getElementById('tipCameraSelect');
+        if (!hotelSel || !roomSel) return;
+
+        function filterRooms() {
+            const hId = hotelSel.value;
+            let anyVisible = false;
+            roomSel.querySelectorAll('option[data-hotel-id]').forEach(function (opt) {
+                const match = !hId || opt.dataset.hotelId === hId;
+                opt.hidden = !match;
+                if (!match && opt.selected) { opt.selected = false; roomSel.value = ''; }
+                if (match) anyVisible = true;
+            });
+        }
+
+        hotelSel.addEventListener('change', filterRooms);
+        filterRooms();
+    })();
+</script>
+</body>
+</html>

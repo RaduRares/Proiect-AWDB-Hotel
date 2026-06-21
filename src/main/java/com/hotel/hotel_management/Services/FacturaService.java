@@ -49,9 +49,7 @@ public class FacturaService {
     }
 
     public Factura save(Factura factura) {
-        if (factura.getId() == null) {
-            calculeazaSumeAutomat(factura);
-        }
+        calculeazaSumeAutomat(factura);
         log.info("Saving invoice: {}", factura.getNumarFactura());
         return facturaRepository.save(factura);
     }
