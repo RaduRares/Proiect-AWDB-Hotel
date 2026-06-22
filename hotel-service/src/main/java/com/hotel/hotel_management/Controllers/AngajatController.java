@@ -67,8 +67,14 @@ public class AngajatController {
             model.addAttribute("returnHotelId", returnHotelId);
             return "angajati/form";
         }
-        angajatService.save(angajat);
-        redirectAttributes.addFlashAttribute("success", "Angajatul a fost adaugat cu succes!");
+        Angajat saved = angajatService.save(angajat);
+        angajatService.autoCreateUser(saved).ifPresentOrElse(
+                cred -> {
+                    redirectAttributes.addFlashAttribute("success", "Angajatul a fost adaugat cu succes!");
+                    redirectAttributes.addFlashAttribute("info", "Cont creat automat — " + cred);
+                },
+                () -> redirectAttributes.addFlashAttribute("success", "Angajatul a fost adaugat cu succes!")
+        );
         if (returnHotelId != null) {
             return "redirect:/hoteluri/" + returnHotelId;
         }
