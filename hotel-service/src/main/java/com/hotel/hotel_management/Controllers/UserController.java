@@ -37,7 +37,9 @@ public class UserController {
     @GetMapping
     public String list(Model model) {
         List<User> users = userRepository.findAll();
-        List<Rol> roluri = rolRepository.findAll();
+        List<Rol> roluri = rolRepository.findAll().stream()
+                .filter(r -> !"ADMINISTRATOR".equals(r.getNume()))
+                .toList();
         List<Hotel> hoteluri = hotelRepository.findAll();
         model.addAttribute("users", users);
         model.addAttribute("roluri", roluri);
@@ -49,6 +51,10 @@ public class UserController {
     public String schimbaRol(@PathVariable Long id,
                               @RequestParam String numRol,
                               RedirectAttributes redirectAttributes) {
+        if ("ADMINISTRATOR".equals(numRol)) {
+            redirectAttributes.addFlashAttribute("error", "Nu poti asigna rolul ADMINISTRATOR.");
+            return "redirect:/utilizatori";
+        }
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", id));
         Rol rol = rolRepository.findByNume(numRol)
@@ -87,7 +93,8 @@ public class UserController {
     @GetMapping("/nou")
     public String createForm(Model model) {
         model.addAttribute("user", new User());
-        model.addAttribute("roluri", rolRepository.findAll());
+        model.addAttribute("roluri", rolRepository.findAll().stream()
+                .filter(r -> !"ADMINISTRATOR".equals(r.getNume())).toList());
         model.addAttribute("hoteluri", hotelRepository.findAll());
         return "utilizatori/form";
     }
@@ -99,6 +106,10 @@ public class UserController {
                          @RequestParam String numRol,
                          @RequestParam(required = false) Long hotelId,
                          RedirectAttributes redirectAttributes) {
+        if ("ADMINISTRATOR".equals(numRol)) {
+            redirectAttributes.addFlashAttribute("error", "Nu poti asigna rolul ADMINISTRATOR.");
+            return "redirect:/utilizatori/nou";
+        }
         if (userRepository.findByUsername(username).isPresent()) {
             redirectAttributes.addFlashAttribute("error", "Username '" + username + "' exista deja.");
             return "redirect:/utilizatori/nou";
