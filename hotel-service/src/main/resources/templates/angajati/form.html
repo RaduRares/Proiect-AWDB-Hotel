@@ -35,12 +35,21 @@
 
                         <div class="mb-3">
                             <label class="form-label">Functie <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control"
-                                   th:field="*{functie}"
-                                   th:classappend="${#fields.hasErrors('functie')} ? 'is-invalid'"
-                                   required>
-                            <div class="invalid-feedback"
-                                 th:if="${#fields.hasErrors('functie')}" th:errors="*{functie}">Eroare</div>
+                            <select class="form-select"
+                                    th:field="*{functie}"
+                                    th:classappend="${#fields.hasErrors('functie')} ? 'is-invalid'"
+                                    required>
+                                <option value="">-- Selectati functia --</option>
+                                <option value="Receptioner">Receptioner</option>
+                                <option value="Manager">Manager</option>
+                                <option value="Camerist">Camerist</option>
+                                <option value="Bucatar">Bucatar</option>
+                                <option value="Tehnician">Tehnician</option>
+                                <option value="Paznic">Paznic</option>
+                                <option value="Contabil">Contabil</option>
+                                <option value="Administrator">Administrator</option>
+                            </select>
+                            <div class="invalid-feedback">Selectati o functie.</div>
                         </div>
 
                         <div class="row">
