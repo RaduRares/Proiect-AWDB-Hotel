@@ -9,25 +9,25 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
-                <li sec:authorize="hasRole('ADMIN')" class="nav-item">
+                <li sec:authorize="hasAnyRole('ADMINISTRATOR','ADMIN')" class="nav-item">
                     <a class="nav-link" th:href="@{/hoteluri}">Hoteluri</a>
                 </li>
-                <li sec:authorize="hasAnyRole('ADMIN','RECEPTIONER')" class="nav-item">
+                <li sec:authorize="hasAnyRole('ADMINISTRATOR','ADMIN','RECEPTIONER')" class="nav-item">
                     <a class="nav-link" th:href="@{/oaspeti}">Oaspeti</a>
                 </li>
-                <li sec:authorize="hasAnyRole('ADMIN','RECEPTIONER')" class="nav-item">
+                <li sec:authorize="hasAnyRole('ADMINISTRATOR','ADMIN','RECEPTIONER')" class="nav-item">
                     <a class="nav-link" th:href="@{/rezervari}">Rezervari</a>
                 </li>
-                <li sec:authorize="hasAnyRole('ADMIN','RECEPTIONER')" class="nav-item">
+                <li sec:authorize="hasAnyRole('ADMINISTRATOR','ADMIN','RECEPTIONER')" class="nav-item">
                     <a class="nav-link" th:href="@{/servicii}">Servicii</a>
                 </li>
-                <li sec:authorize="hasAnyRole('ADMIN','RECEPTIONER')" class="nav-item">
+                <li sec:authorize="hasAnyRole('ADMINISTRATOR','ADMIN','RECEPTIONER')" class="nav-item">
                     <a class="nav-link" th:href="@{/facturi}">Facturi</a>
                 </li>
-                <li sec:authorize="hasRole('ADMIN')" class="nav-item">
+                <li sec:authorize="hasAnyRole('ADMINISTRATOR','ADMIN')" class="nav-item">
                     <a class="nav-link" th:href="@{/inventar-camere}">Inventar Camere</a>
                 </li>
-                <li sec:authorize="hasRole('ADMIN')" class="nav-item">
+                <li sec:authorize="hasRole('ADMINISTRATOR')" class="nav-item">
                     <a class="nav-link" th:href="@{/utilizatori}">Utilizatori</a>
                 </li>
             </ul>

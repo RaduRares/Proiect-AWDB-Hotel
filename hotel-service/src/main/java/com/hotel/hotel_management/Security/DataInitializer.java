@@ -42,23 +42,35 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (rolRepository.count() > 0) {
+        // Always ensure all roles exist (safe to run on existing DB)
+        Rol administratorRole = ensureRole("ADMINISTRATOR");
+        Rol adminRole = ensureRole("ADMIN");
+        Rol receptionerRole = ensureRole("RECEPTIONER");
+        Rol userRole = ensureRole("USER");
+
+        // Upgrade existing "admin" user to ADMINISTRATOR if still on old ADMIN role
+        userRepository.findByUsername("admin").ifPresent(adminUser -> {
+            boolean hasAdministrator = adminUser.getRoluri().stream()
+                    .anyMatch(r -> "ADMINISTRATOR".equals(r.getNume()));
+            if (!hasAdministrator) {
+                adminUser.setRoluri(Set.of(administratorRole));
+                userRepository.save(adminUser);
+                log.info("Upgraded 'admin' user to ADMINISTRATOR role.");
+            }
+        });
+
+        if (userRepository.count() > 0) {
             log.info("Demo data already present, skipping initialization.");
             return;
         }
         log.info("Initializing demo data...");
-
-        // Roles
-        Rol adminRole = rolRepository.save(Rol.builder().nume("ADMIN").build());
-        Rol receptionerRole = rolRepository.save(Rol.builder().nume("RECEPTIONER").build());
-        Rol userRole = rolRepository.save(Rol.builder().nume("USER").build());
 
         // Users
         userRepository.save(User.builder()
                 .username("admin")
                 .email("admin@hotel.com")
                 .password(passwordEncoder.encode("admin123"))
-                .roluri(Set.of(adminRole))
+                .roluri(Set.of(administratorRole))
                 .build());
 
         userRepository.save(User.builder()
@@ -171,5 +183,10 @@ public class DataInitializer implements CommandLineRunner {
                 .build());
 
         log.info("Demo data initialized successfully.");
+    }
+
+    private Rol ensureRole(String name) {
+        return rolRepository.findByNume(name)
+                .orElseGet(() -> rolRepository.save(Rol.builder().nume(name).build()));
     }
 }

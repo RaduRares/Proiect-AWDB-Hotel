@@ -21,19 +21,21 @@ public class SecurityConfig {
                 .requestMatchers("/login", "/register").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
 
-                // Doar ADMIN: structura hotel, angajati, inventar, tipuri camere, utilizatori
-                .requestMatchers("/hoteluri/**").hasRole("ADMIN")
-                .requestMatchers("/angajati/**").hasRole("ADMIN")
-                .requestMatchers("/inventar-camere/**").hasRole("ADMIN")
-                .requestMatchers("/tipuri-camere/**").hasRole("ADMIN")
-                .requestMatchers("/utilizatori/**").hasRole("ADMIN")
+                // Doar ADMINISTRATOR: gestionare utilizatori
+                .requestMatchers("/utilizatori/**").hasRole("ADMINISTRATOR")
 
-                // ADMIN + RECEPTIONER: operatiuni zilnice
-                .requestMatchers("/rezervari/**").hasAnyRole("ADMIN", "RECEPTIONER")
-                .requestMatchers("/oaspeti/**").hasAnyRole("ADMIN", "RECEPTIONER")
-                .requestMatchers("/facturi/**").hasAnyRole("ADMIN", "RECEPTIONER")
-                .requestMatchers("/servicii/**").hasAnyRole("ADMIN", "RECEPTIONER")
-                .requestMatchers("/rezervare-servicii/**").hasAnyRole("ADMIN", "RECEPTIONER")
+                // ADMINISTRATOR + ADMIN: structura hotel, angajati, inventar
+                .requestMatchers("/hoteluri/**").hasAnyRole("ADMINISTRATOR", "ADMIN")
+                .requestMatchers("/angajati/**").hasAnyRole("ADMINISTRATOR", "ADMIN")
+                .requestMatchers("/inventar-camere/**").hasAnyRole("ADMINISTRATOR", "ADMIN")
+                .requestMatchers("/tipuri-camere/**").hasAnyRole("ADMINISTRATOR", "ADMIN")
+
+                // ADMINISTRATOR + ADMIN + RECEPTIONER: operatiuni zilnice
+                .requestMatchers("/rezervari/**").hasAnyRole("ADMINISTRATOR", "ADMIN", "RECEPTIONER")
+                .requestMatchers("/oaspeti/**").hasAnyRole("ADMINISTRATOR", "ADMIN", "RECEPTIONER")
+                .requestMatchers("/facturi/**").hasAnyRole("ADMINISTRATOR", "ADMIN", "RECEPTIONER")
+                .requestMatchers("/servicii/**").hasAnyRole("ADMINISTRATOR", "ADMIN", "RECEPTIONER")
+                .requestMatchers("/rezervare-servicii/**").hasAnyRole("ADMINISTRATOR", "ADMIN", "RECEPTIONER")
 
                 // Orice utilizator autentificat: home
                 .anyRequest().authenticated()
