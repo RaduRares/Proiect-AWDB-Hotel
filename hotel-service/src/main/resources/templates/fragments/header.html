@@ -31,8 +31,9 @@
                     <a class="nav-link" th:href="@{/utilizatori}">Utilizatori</a>
                 </li>
             </ul>
-            <div class="d-flex align-items-center" sec:authorize="isAuthenticated()">
-                <span class="text-light me-3" sec:authentication="name">User</span>
+            <div class="d-flex align-items-center gap-2" sec:authorize="isAuthenticated()">
+                <span class="text-light" sec:authentication="name">User</span>
+                <a th:href="@{/utilizatori/profil/schimba-parola}" class="btn btn-outline-light btn-sm">Parola mea</a>
                 <form th:action="@{/logout}" method="post" class="mb-0">
                     <button type="submit" class="btn btn-outline-light btn-sm">Deconectare</button>
                 </form>

@@ -15,6 +15,7 @@
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Utilizatori</h1>
+        <a th:href="@{/utilizatori/nou}" class="btn btn-primary">+ Utilizator nou</a>
     </div>
 
     <div class="card shadow-sm border-0">
@@ -71,6 +72,9 @@
                             </select>
                             <button type="submit" class="btn btn-sm btn-outline-info">Hotel</button>
                         </form>
+                        <!-- Schimba parola -->
+                        <a th:href="@{/utilizatori/{id}/schimba-parola(id=${u.id})}"
+                           class="btn btn-sm btn-outline-secondary ms-1">Parola</a>
                         <!-- Sterge -->
                         <form th:action="@{/utilizatori/{id}/delete(id=${u.id})}" method="post" class="d-inline"
                               onsubmit="return confirm('Stergi utilizatorul ' + /*[[${u.username}]]*/ '' + '?')">
