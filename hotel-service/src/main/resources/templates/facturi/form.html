@@ -29,7 +29,7 @@
                                 <option value="">-- Selectati rezervarea --</option>
                                 <option th:each="r : ${rezervari}"
                                         th:value="${r.id}"
-                                        th:text="'#' + ${r.id} + ' - ' + ${r.oaspete.nume} + ' (' + ${r.hotel.nume} + ')'">
+                                        th:text="'#' + ${r.id} + ' - ' + (${r.oaspete != null} ? ${r.oaspete.nume} : '?') + ' (' + (${r.hotel != null} ? ${r.hotel.nume} : '?') + ')'">
                                 </option>
                             </select>
                             <div class="invalid-feedback">Selectati o rezervare.</div>

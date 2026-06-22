@@ -1,9 +1,6 @@
 package com.hotel.hotel_management.Models;
 
 import jakarta.persistence.*;
-import jakarta.validation.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -20,11 +17,9 @@ public class Factura {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
     @Column(name = "numar_factura", nullable = false, unique = true)
     private String numarFactura;
 
-    @NotNull
     @Column(name = "suma_totala", precision = 10, scale = 2, nullable = false)
     private BigDecimal sumaTotal;
 
