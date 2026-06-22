@@ -48,15 +48,11 @@ public class DataInitializer implements CommandLineRunner {
         Rol receptionerRole = ensureRole("RECEPTIONER");
         Rol userRole = ensureRole("USER");
 
-        // Upgrade existing "admin" user to ADMINISTRATOR if still on old ADMIN role
+        // Ensure "admin" user always has ADMINISTRATOR role
         userRepository.findByUsername("admin").ifPresent(adminUser -> {
-            boolean hasAdministrator = adminUser.getRoluri().stream()
-                    .anyMatch(r -> "ADMINISTRATOR".equals(r.getNume()));
-            if (!hasAdministrator) {
-                adminUser.setRoluri(Set.of(administratorRole));
-                userRepository.save(adminUser);
-                log.info("Upgraded 'admin' user to ADMINISTRATOR role.");
-            }
+            adminUser.setRoluri(Set.of(administratorRole));
+            userRepository.save(adminUser);
+            log.info("Ensured 'admin' user has ADMINISTRATOR role.");
         });
 
         if (userRepository.count() > 0) {
