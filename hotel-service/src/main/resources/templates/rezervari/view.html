@@ -15,14 +15,36 @@
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2 th:text="'Rezervare #' + ${rezervare.id}">Rezervare</h2>
-        <div class="d-flex gap-2">
-            <a th:href="@{/rezervari/{id}/edit(id=${rezervare.id})}" class="btn btn-outline-warning">Editeaza</a>
+        <div class="d-flex gap-2 flex-wrap">
+            <!-- Check-in -->
+            <form th:if="${rezervare.status.name() == 'CONFIRMATA' or rezervare.status.name() == 'IN_ASTEPTARE'}"
+                  th:action="@{/rezervari/{id}/schimba-status(id=${rezervare.id})}" method="post">
+                <input type="hidden" name="status" value="CHECKED_IN">
+                <button type="submit" class="btn btn-primary">Check-in</button>
+            </form>
+            <!-- Check-out -->
+            <form th:if="${rezervare.status.name() == 'CHECKED_IN'}"
+                  th:action="@{/rezervari/{id}/schimba-status(id=${rezervare.id})}" method="post">
+                <input type="hidden" name="status" value="CHECKED_OUT">
+                <button type="submit" class="btn btn-success">Check-out + Factura</button>
+            </form>
+            <!-- Anuleaza -->
+            <form th:if="${rezervare.status.name() != 'ANULATA' and rezervare.status.name() != 'CHECKED_OUT'}"
+                  th:action="@{/rezervari/{id}/schimba-status(id=${rezervare.id})}" method="post"
+                  onsubmit="return confirm('Anulati rezervarea?')">
+                <input type="hidden" name="status" value="ANULATA">
+                <button type="submit" class="btn btn-outline-danger">Anuleaza</button>
+            </form>
+            <!-- Editeaza -->
+            <a th:if="${rezervare.status.name() != 'CHECKED_OUT' and rezervare.status.name() != 'ANULATA'}"
+               th:href="@{/rezervari/{id}/edit(id=${rezervare.id})}" class="btn btn-outline-warning">Editeaza</a>
             <a th:href="@{/rezervari}" class="btn btn-outline-secondary">Inapoi</a>
         </div>
     </div>
 
     <div class="row g-4">
         <div class="col-md-5">
+            <!-- Detalii rezervare -->
             <div class="card shadow-sm mb-3">
                 <div class="card-header bg-white"><h5 class="mb-0">Detalii rezervare</h5></div>
                 <div class="card-body">
@@ -42,8 +64,11 @@
                         <dt class="col-sm-5">Tip camera</dt>
                         <dd class="col-sm-7" th:text="${rezervare.tipCamera.nume}"></dd>
 
+                        <dt class="col-sm-5">Check-in</dt>
+                        <dd class="col-sm-7" th:text="${#temporals.format(rezervare.checkIn, 'dd.MM.yyyy')}"></dd>
+
                         <dt class="col-sm-5">Check-out</dt>
-                        <dd class="col-sm-7" th:text="${rezervare.checkOut}"></dd>
+                        <dd class="col-sm-7" th:text="${#temporals.format(rezervare.checkOut, 'dd.MM.yyyy')}"></dd>
 
                         <dt class="col-sm-5">Nr. persoane</dt>
                         <dd class="col-sm-7" th:text="${rezervare.nrPersoane}"></dd>
@@ -59,7 +84,7 @@
                         </dd>
 
                         <dt class="col-sm-5">Creat la</dt>
-                        <dd class="col-sm-7" th:text="${rezervare.creatLa}"></dd>
+                        <dd class="col-sm-7" th:text="${#temporals.format(rezervare.creatLa, 'dd.MM.yyyy HH:mm')}"></dd>
 
                         <dt class="col-sm-5" th:if="${rezervare.observatii}">Observatii</dt>
                         <dd class="col-sm-7" th:if="${rezervare.observatii}" th:text="${rezervare.observatii}"></dd>
@@ -69,59 +94,108 @@
 
             <!-- Factura -->
             <div class="card shadow-sm" th:if="${rezervare.factura != null}">
-                <div class="card-header bg-white"><h5 class="mb-0">Factura</h5></div>
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Factura</h5>
+                    <a th:href="@{/facturi/{id}(id=${rezervare.factura.id})}"
+                       class="btn btn-sm btn-outline-info">Vezi factura</a>
+                </div>
                 <div class="card-body">
                     <dl class="row mb-0">
                         <dt class="col-sm-5">Nr. factura</dt>
-                        <dd class="col-sm-7">
-                            <a th:href="@{/facturi/{id}(id=${rezervare.factura.id})}"
-                               th:text="${rezervare.factura.numarFactura}"></a>
-                        </dd>
+                        <dd class="col-sm-7" th:text="${rezervare.factura.numarFactura}"></dd>
 
-                        <dt class="col-sm-5">Total</dt>
-                        <dd class="col-sm-7" th:text="${rezervare.factura.sumaTotal} + ' RON'"></dd>
+                        <dt class="col-sm-5">Camera</dt>
+                        <dd class="col-sm-7" th:text="${rezervare.factura.sumaCamera} + ' RON'"></dd>
 
-                        <dt class="col-sm-5">Status</dt>
+                        <dt class="col-sm-5">Servicii</dt>
+                        <dd class="col-sm-7" th:text="${rezervare.factura.sumaServicii} + ' RON'"></dd>
+
+                        <dt class="col-sm-5"><strong>Total</strong></dt>
+                        <dd class="col-sm-7"><strong th:text="${rezervare.factura.sumaTotal} + ' RON'"></strong></dd>
+
+                        <dt class="col-sm-5">Scadenta</dt>
+                        <dd class="col-sm-7" th:text="${rezervare.factura.scadenta != null} ? ${#temporals.format(rezervare.factura.scadenta, 'dd.MM.yyyy')} : '-'"></dd>
+
+                        <dt class="col-sm-5">Status plata</dt>
                         <dd class="col-sm-7">
                             <span class="badge"
                                   th:classappend="${rezervare.factura.statusPlata.name() == 'PLATITA'} ? 'bg-success' :
-                                                 (${rezervare.factura.statusPlata.name() == 'ANULATA'} ? 'bg-danger' : 'bg-warning')"
+                                                 (${rezervare.factura.statusPlata.name() == 'ANULATA'} ? 'bg-danger' : 'bg-warning text-dark')"
                                   th:text="${rezervare.factura.statusPlata}"></span>
                         </dd>
                     </dl>
+                    <!-- Marcheaza platit -->
+                    <form th:if="${rezervare.factura.statusPlata.name() == 'NEPLATITA'}"
+                          th:action="@{/facturi/{id}/marcheaza-platit(id=${rezervare.factura.id})}" method="post"
+                          class="mt-3">
+                        <button type="submit" class="btn btn-success w-100">Marcheaza ca platita</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Factura inca nu exista -->
+            <div class="card shadow-sm border-warning" th:if="${rezervare.factura == null and rezervare.status.name() == 'CHECKED_OUT'}">
+                <div class="card-body text-center text-warning">
+                    <p class="mb-0">Factura nu a fost generata. Mergi la lista rezervari si executa check-out.</p>
                 </div>
             </div>
         </div>
 
         <div class="col-md-7">
+            <!-- Servicii -->
             <div class="card shadow-sm">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Servicii adaugate</h5>
-                    <a th:href="@{/rezervari/{id}/servicii/nou(id=${rezervare.id})}"
+                    <h5 class="mb-0">Servicii consumate</h5>
+                    <!-- Adauga serviciu doar cand CHECKED_IN -->
+                    <a th:if="${rezervare.status.name() == 'CHECKED_IN'}"
+                       th:href="@{/rezervari/{id}/servicii/nou(id=${rezervare.id})}"
                        class="btn btn-sm btn-outline-primary">+ Adauga serviciu</a>
+                    <span th:if="${rezervare.status.name() != 'CHECKED_IN' and rezervare.status.name() != 'CHECKED_OUT'}"
+                          class="text-muted small">Disponibil dupa check-in</span>
                 </div>
                 <div class="card-body p-0">
                     <table class="table table-sm mb-0">
                         <thead class="table-light">
-                        <tr><th>Serviciu</th><th>Cantitate</th><th>Data</th><th></th></tr>
+                        <tr>
+                            <th>Serviciu</th>
+                            <th>Pret/unit</th>
+                            <th>Cant.</th>
+                            <th>Subtotal</th>
+                            <th>Data</th>
+                            <th th:if="${rezervare.status.name() == 'CHECKED_IN'}"></th>
+                        </tr>
                         </thead>
                         <tbody>
                         <tr th:if="${rezervare.rezervariServicii.isEmpty()}">
-                            <td colspan="4" class="text-muted text-center py-2">Nu exista servicii adaugate.</td>
+                            <td colspan="6" class="text-muted text-center py-3">Nu sunt servicii adaugate.</td>
                         </tr>
                         <tr th:each="rs : ${rezervare.rezervariServicii}">
                             <td th:text="${rs.serviciu.nume}"></td>
+                            <td th:text="${rs.serviciu.cost} + ' RON'"></td>
                             <td th:text="${rs.cantitate}"></td>
-                            <td th:text="${rs.dataFolosinta} ?: '-'"></td>
-                            <td>
+                            <td th:text="${rs.serviciu.cost * rs.cantitate} + ' RON'"></td>
+                            <td th:text="${rs.dataFolosinta != null} ? ${#temporals.format(rs.dataFolosinta, 'dd.MM.yyyy')} : '-'"></td>
+                            <td th:if="${rezervare.status.name() == 'CHECKED_IN'}">
                                 <form th:action="@{/rezervari/{rId}/servicii/{id}/delete(rId=${rezervare.id}, id=${rs.id})}"
-                                      method="post" class="d-inline">
-                                    <button type="submit" class="btn btn-sm btn-link text-danger p-0">Sterge</button>
+                                      method="post">
+                                    <button type="submit" class="btn btn-sm btn-link text-danger p-0"
+                                            onclick="return confirm('Stergi serviciul?')">Sterge</button>
                                 </form>
                             </td>
                         </tr>
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            <!-- Info flux -->
+            <div class="card mt-3 border-0 bg-light">
+                <div class="card-body text-muted small">
+                    <strong>Flux:</strong>
+                    Rezervare → <strong>Check-in</strong> (oaspetele soseste) →
+                    <em>adauga servicii consumate</em> →
+                    <strong>Check-out</strong> (factura se genereaza automat) →
+                    <strong>Marcheaza platit</strong>
                 </div>
             </div>
         </div>

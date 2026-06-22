@@ -15,7 +15,7 @@
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2>Facturi</h2>
-        <a th:href="@{/facturi/nou}" class="btn btn-primary">+ Factura noua</a>
+        <span class="text-muted small">Facturile se genereaza automat la check-out</span>
     </div>
 
     <div class="card shadow-sm">
@@ -23,53 +23,58 @@
             <table class="table table-striped table-hover mb-0">
                 <thead class="table-dark">
                 <tr>
-                    <th>#</th>
                     <th>Nr. Factura</th>
+                    <th>Oaspete</th>
+                    <th>Hotel</th>
                     <th>
                         <a th:href="@{/facturi(page=${page.number}, size=${page.size},
                             sortBy='sumaTotal', sortDir=${sortBy == 'sumaTotal' && sortDir == 'asc'} ? 'desc' : 'asc')}"
                            class="text-white text-decoration-none">
-                            Total (RON) <span th:if="${sortBy == 'sumaTotal'}" th:text="${sortDir == 'asc'} ? '▲' : '▼'"></span>
+                            Total <span th:if="${sortBy == 'sumaTotal'}" th:text="${sortDir == 'asc'} ? '▲' : '▼'"></span>
                         </a>
                     </th>
                     <th>
                         <a th:href="@{/facturi(page=${page.number}, size=${page.size},
                             sortBy='emisaLa', sortDir=${sortBy == 'emisaLa' && sortDir == 'asc'} ? 'desc' : 'asc')}"
                            class="text-white text-decoration-none">
-                            Emisa la <span th:if="${sortBy == 'emisaLa'}" th:text="${sortDir == 'asc'} ? '▲' : '▼'"></span>
+                            Emisa <span th:if="${sortBy == 'emisaLa'}" th:text="${sortDir == 'asc'} ? '▲' : '▼'"></span>
                         </a>
                     </th>
-                    <th>Status plata</th>
-                    <th>Rezervare</th>
+                    <th>Scadenta</th>
+                    <th>Status</th>
                     <th>Actiuni</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:if="${page.totalElements == 0}">
-                    <td colspan="7" class="text-center text-muted py-4">Nu exista facturi.</td>
+                    <td colspan="8" class="text-center text-muted py-4">Nu exista facturi. Efectuati check-out pentru a genera o factura.</td>
                 </tr>
                 <tr th:each="f : ${page.content}">
-                    <td th:text="${f.id}"></td>
-                    <td th:text="${f.numarFactura}"></td>
-                    <td th:text="${f.sumaTotal}"></td>
-                    <td th:text="${f.emisaLa}"></td>
+                    <td>
+                        <a th:href="@{/facturi/{id}(id=${f.id})}" th:text="${f.numarFactura}"
+                           class="text-decoration-none fw-bold"></a>
+                    </td>
+                    <td>
+                        <a th:href="@{/rezervari/{id}(id=${f.rezervare.id})}"
+                           th:text="${f.rezervare.oaspete != null} ? ${f.rezervare.oaspete.nume} : '-'"
+                           class="text-decoration-none"></a>
+                    </td>
+                    <td th:text="${f.rezervare.hotel != null} ? ${f.rezervare.hotel.nume} : '-'"></td>
+                    <td class="fw-bold" th:text="${f.sumaTotal} + ' RON'"></td>
+                    <td th:text="${#temporals.format(f.emisaLa, 'dd.MM.yyyy HH:mm')}"></td>
+                    <td th:text="${f.scadenta != null} ? ${#temporals.format(f.scadenta, 'dd.MM.yyyy')} : '-'"></td>
                     <td>
                         <span class="badge"
                               th:classappend="${f.statusPlata.name() == 'PLATITA'} ? 'bg-success' :
                                              (${f.statusPlata.name() == 'ANULATA'} ? 'bg-danger' : 'bg-warning text-dark')"
                               th:text="${f.statusPlata}"></span>
                     </td>
-                    <td>
-                        <a th:href="@{/rezervari/{id}(id=${f.rezervare.id})}"
-                           th:text="'#' + ${f.rezervare.id}"></a>
-                    </td>
                     <td class="text-nowrap">
-                        <a th:href="@{/facturi/{id}(id=${f.id})}" class="btn btn-sm btn-outline-info me-1">Detalii</a>
-                        <a th:href="@{/facturi/{id}/edit(id=${f.id})}" class="btn btn-sm btn-outline-warning me-1">Editeaza</a>
                         <form th:if="${f.statusPlata.name() == 'NEPLATITA'}"
                               th:action="@{/facturi/{id}/marcheaza-platit(id=${f.id})}" method="post" class="d-inline me-1">
                             <button type="submit" class="btn btn-sm btn-success">Platit</button>
                         </form>
+                        <a th:href="@{/facturi/{id}(id=${f.id})}" class="btn btn-sm btn-outline-info me-1">Detalii</a>
                         <button type="button" class="btn btn-sm btn-outline-danger"
                                 data-bs-toggle="modal" th:data-bs-target="'#del' + ${f.id}">Sterge</button>
                         <div class="modal fade" th:id="'del' + ${f.id}" tabindex="-1">
