@@ -1,7 +1,6 @@
 package com.hotel.hotel_management.Integration;
 
 import com.hotel.hotel_management.Models.*;
-import com.hotel.hotel_management.Repositories.NrCurentHotelTipCameraRepository;
 import com.hotel.hotel_management.Services.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,7 +23,6 @@ class RezervareIntegrationTest {
     @Autowired private HotelService hotelService;
     @Autowired private TipCameraService tipCameraService;
     @Autowired private OaspeteService oaspeteService;
-    @Autowired private NrCurentHotelTipCameraRepository nrCurentRepo;
 
     private Hotel hotel;
     private TipCamera tipCamera;
@@ -46,11 +44,7 @@ class RezervareIntegrationTest {
                 .hotel(hotel)
                 .build());
 
-        nrCurentRepo.save(NrCurentHotelTipCamera.builder()
-                .hotel(hotel)
-                .tipCamera(tipCamera)
-                .numarTotal(1)
-                .build());
+        // NrCurentHotelTipCamera is auto-created by tipCameraService.save() above
 
         oaspete = oaspeteService.save(Oaspete.builder()
                 .nume("Test Oaspete")

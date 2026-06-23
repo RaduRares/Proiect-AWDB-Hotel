@@ -55,7 +55,9 @@ public class FacturaService {
 
     public Factura save(Factura factura) {
         boolean isNew = factura.getId() == null;
-        calculeazaSumeAutomat(factura);
+        if (isNew) {
+            calculeazaSumeAutomat(factura);
+        }
         log.info("Saving invoice: {}", factura.getNumarFactura());
         Factura saved = facturaRepository.save(factura);
         if (isNew) {
