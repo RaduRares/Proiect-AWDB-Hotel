@@ -51,35 +51,44 @@
                     </td>
                     <td th:text="${#temporals.format(u.creatLa, 'dd.MM.yyyy HH:mm')}"></td>
                     <td>
-                        <!-- Schimba rol -->
-                        <form th:action="@{/utilizatori/{id}/rol(id=${u.id})}" method="post" class="d-inline-flex gap-1 mb-1">
-                            <select name="numRol" class="form-select form-select-sm" style="width:auto">
-                                <option th:each="r : ${roluri}"
-                                        th:value="${r.nume}"
-                                        th:text="${r.nume}"
-                                        th:selected="${u.roluri.contains(r)}"></option>
-                            </select>
-                            <button type="submit" class="btn btn-sm btn-outline-primary">Rol</button>
-                        </form>
-                        <!-- Asigneaza hotel -->
-                        <form th:action="@{/utilizatori/{id}/hotel(id=${u.id})}" method="post" class="d-inline-flex gap-1 mb-1">
-                            <select name="hotelId" class="form-select form-select-sm" style="width:auto">
-                                <option value="">— fara hotel —</option>
-                                <option th:each="h : ${hoteluri}"
-                                        th:value="${h.id}"
-                                        th:text="${h.nume}"
-                                        th:selected="${u.hotel != null and u.hotel.id == h.id}"></option>
-                            </select>
-                            <button type="submit" class="btn btn-sm btn-outline-info">Hotel</button>
-                        </form>
-                        <!-- Schimba parola -->
-                        <a th:href="@{/utilizatori/{id}/schimba-parola(id=${u.id})}"
-                           class="btn btn-sm btn-outline-secondary ms-1">Parola</a>
-                        <!-- Sterge -->
-                        <form th:action="@{/utilizatori/{id}/delete(id=${u.id})}" method="post" class="d-inline"
-                              onsubmit="return confirm('Stergi utilizatorul ' + /*[[${u.username}]]*/ '' + '?')">
-                            <button type="submit" class="btn btn-sm btn-outline-danger ms-1">Sterge</button>
-                        </form>
+                        <!-- Cont ADMINISTRATOR: protejat -->
+                        <th:block th:if="${administratorIds.contains(u.id)}">
+                            <span class="badge bg-dark">Cont protejat</span>
+                            <a th:href="@{/utilizatori/{id}/schimba-parola(id=${u.id})}"
+                               class="btn btn-sm btn-outline-secondary ms-1">Parola</a>
+                        </th:block>
+                        <!-- Conturi normale -->
+                        <th:block th:unless="${administratorIds.contains(u.id)}">
+                            <!-- Schimba rol -->
+                            <form th:action="@{/utilizatori/{id}/rol(id=${u.id})}" method="post" class="d-inline-flex gap-1 mb-1">
+                                <select name="numRol" class="form-select form-select-sm" style="width:auto">
+                                    <option th:each="r : ${roluri}"
+                                            th:value="${r.nume}"
+                                            th:text="${r.nume}"
+                                            th:selected="${u.roluri.contains(r)}"></option>
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-outline-primary">Rol</button>
+                            </form>
+                            <!-- Asigneaza hotel -->
+                            <form th:action="@{/utilizatori/{id}/hotel(id=${u.id})}" method="post" class="d-inline-flex gap-1 mb-1">
+                                <select name="hotelId" class="form-select form-select-sm" style="width:auto">
+                                    <option value="">— fara hotel —</option>
+                                    <option th:each="h : ${hoteluri}"
+                                            th:value="${h.id}"
+                                            th:text="${h.nume}"
+                                            th:selected="${u.hotel != null and u.hotel.id == h.id}"></option>
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-outline-info">Hotel</button>
+                            </form>
+                            <!-- Schimba parola -->
+                            <a th:href="@{/utilizatori/{id}/schimba-parola(id=${u.id})}"
+                               class="btn btn-sm btn-outline-secondary ms-1">Parola</a>
+                            <!-- Sterge -->
+                            <form th:action="@{/utilizatori/{id}/delete(id=${u.id})}" method="post" class="d-inline"
+                                  onsubmit="return confirm('Stergi utilizatorul ' + /*[[${u.username}]]*/ '' + '?')">
+                                <button type="submit" class="btn btn-sm btn-outline-danger ms-1">Sterge</button>
+                            </form>
+                        </th:block>
                     </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(users)}">

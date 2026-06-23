@@ -14,8 +14,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/utilizatori")
@@ -40,10 +42,14 @@ public class UserController {
         List<Rol> roluri = rolRepository.findAll().stream()
                 .filter(r -> !"ADMINISTRATOR".equals(r.getNume()))
                 .toList();
-        List<Hotel> hoteluri = hotelRepository.findAll();
+        Set<Long> administratorIds = users.stream()
+                .filter(u -> u.getRoluri().stream().anyMatch(r -> "ADMINISTRATOR".equals(r.getNume())))
+                .map(User::getId)
+                .collect(java.util.stream.Collectors.toSet());
         model.addAttribute("users", users);
         model.addAttribute("roluri", roluri);
-        model.addAttribute("hoteluri", hoteluri);
+        model.addAttribute("hoteluri", hotelRepository.findAll());
+        model.addAttribute("administratorIds", administratorIds);
         return "utilizatori/list";
     }
 
@@ -57,9 +63,17 @@ public class UserController {
         }
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", id));
+        boolean isAdministrator = user.getRoluri().stream()
+                .anyMatch(r -> "ADMINISTRATOR".equals(r.getNume()));
+        if (isAdministrator) {
+            redirectAttributes.addFlashAttribute("error", "Contul ADMINISTRATOR nu poate fi modificat.");
+            return "redirect:/utilizatori";
+        }
         Rol rol = rolRepository.findByNume(numRol)
                 .orElseThrow(() -> new ResourceNotFoundException("Rol negasit: " + numRol));
-        user.setRoluri(Set.of(rol));
+        Set<Rol> nouSet = new HashSet<>();
+        nouSet.add(rol);
+        user.setRoluri(nouSet);
         userRepository.save(user);
         redirectAttributes.addFlashAttribute("success", "Rol actualizat pentru " + user.getUsername());
         return "redirect:/utilizatori";
@@ -85,6 +99,12 @@ public class UserController {
                          RedirectAttributes redirectAttributes) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", id));
+        boolean isAdministrator = user.getRoluri().stream()
+                .anyMatch(r -> "ADMINISTRATOR".equals(r.getNume()));
+        if (isAdministrator) {
+            redirectAttributes.addFlashAttribute("error", "Contul ADMINISTRATOR nu poate fi sters.");
+            return "redirect:/utilizatori";
+        }
         userRepository.deleteById(id);
         redirectAttributes.addFlashAttribute("success", "Utilizatorul " + user.getUsername() + " a fost sters.");
         return "redirect:/utilizatori";
