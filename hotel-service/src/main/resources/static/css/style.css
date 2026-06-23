@@ -5,6 +5,9 @@ body {
     background-attachment: fixed;
     background-position: center;
     background-repeat: no-repeat;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 body.bg-light {
@@ -15,6 +18,7 @@ main.container {
     background-color: rgba(255, 255, 255, 0.88);
     border-radius: 0.5rem;
     padding: 1.5rem;
+    flex: 1;
 }
 
 .navbar-brand {
@@ -45,7 +49,9 @@ dt {
 }
 
 footer {
-    border-top: 1px solid #dee2e6;
+    background-color: rgba(0, 0, 0, 0.55) !important;
+    backdrop-filter: blur(4px);
+    border-top: none !important;
 }
 
 /* Pagination active page */
