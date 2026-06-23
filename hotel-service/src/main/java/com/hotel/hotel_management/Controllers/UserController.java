@@ -149,6 +149,7 @@ public class UserController {
     public String schimbaParolaForm(@PathVariable Long id, Model model) {
         model.addAttribute("user", userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", id)));
+        model.addAttribute("adminChange", true);
         return "utilizatori/schimba-parola";
     }
 
@@ -174,6 +175,7 @@ public class UserController {
         User user = userRepository.findByUsername(auth.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("User", 0L));
         model.addAttribute("user", user);
+        model.addAttribute("adminChange", false);
         return "utilizatori/schimba-parola";
     }
 

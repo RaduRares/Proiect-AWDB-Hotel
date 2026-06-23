@@ -19,7 +19,7 @@
                 </div>
                 <div class="card-body">
                     <div th:replace="~{fragments/messages :: messages}"></div>
-                    <form th:action="${#httpServletRequest.isUserInRole('ADMINISTRATOR')}
+                    <form th:action="${adminChange}
                               ? @{/utilizatori/{id}/schimba-parola(id=${user.id})}
                               : @{/utilizatori/profil/schimba-parola}"
                           method="post" class="needs-validation" novalidate>
@@ -38,7 +38,7 @@
 
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary">Salveaza</button>
-                            <a th:href="${#httpServletRequest.isUserInRole('ADMINISTRATOR')} ? '/utilizatori' : '/'"
+                            <a th:href="${adminChange} ? '/utilizatori' : '/'"
                                class="btn btn-outline-secondary">Anuleaza</a>
                         </div>
                     </form>
