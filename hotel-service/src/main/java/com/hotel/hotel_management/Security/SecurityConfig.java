@@ -21,6 +21,9 @@ public class SecurityConfig {
                 .requestMatchers("/login", "/register").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
 
+                // Orice utilizator autentificat: schimbare parola proprie
+                .requestMatchers("/utilizatori/profil/schimba-parola").authenticated()
+
                 // Doar ADMINISTRATOR: gestionare utilizatori
                 .requestMatchers("/utilizatori/**").hasRole("ADMINISTRATOR")
 
