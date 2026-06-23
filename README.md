@@ -1,9 +1,10 @@
 # Hotel Management System
-Construită cu Spring Boot, Maven , PostgresSQL 
-Site-ul oficial este hotel-app-production-3cd6.up.railway.app
-Echipa va fi formata din:
-    1. Costache Alexandra Grabriela
-    2. Ing. Radu Rareș-Andrei
+
+**Live:** [hotel-app-production-3cd6.up.railway.app](https://hotel-app-production-3cd6.up.railway.app)
+
+**Echipa:**
+1. Costache Alexandra Gabriela
+2. Ing. Radu Rareș-Andrei
 
 Descriere proiect:
     -Gestionarea hotelurilor, tipurilor de camere și angajaților
