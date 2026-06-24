@@ -7,6 +7,7 @@ import com.hotel.hotel_management.Models.User;
 import com.hotel.hotel_management.Repositories.HotelRepository;
 import com.hotel.hotel_management.Repositories.RolRepository;
 import com.hotel.hotel_management.Repositories.UserRepository;
+import com.hotel.hotel_management.Security.PasswordPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -130,6 +131,11 @@ public class UserController {
             redirectAttributes.addFlashAttribute("error", "Nu poti asigna rolul ADMINISTRATOR.");
             return "redirect:/utilizatori/nou";
         }
+        String parolaError = PasswordPolicy.validate(password);
+        if (parolaError != null) {
+            redirectAttributes.addFlashAttribute("error", parolaError);
+            return "redirect:/utilizatori/nou";
+        }
         if (userRepository.findByUsername(username).isPresent()) {
             redirectAttributes.addFlashAttribute("error", "Username '" + username + "' exista deja.");
             return "redirect:/utilizatori/nou";
@@ -162,6 +168,11 @@ public class UserController {
             redirectAttributes.addFlashAttribute("error", "Parolele nu coincid.");
             return "redirect:/utilizatori/" + id + "/schimba-parola";
         }
+        String parolaError = PasswordPolicy.validate(parolaNoua);
+        if (parolaError != null) {
+            redirectAttributes.addFlashAttribute("error", parolaError);
+            return "redirect:/utilizatori/" + id + "/schimba-parola";
+        }
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", id));
         user.setPassword(passwordEncoder.encode(parolaNoua));
@@ -186,6 +197,11 @@ public class UserController {
                                       RedirectAttributes redirectAttributes) {
         if (!parolaNoua.equals(confirmare)) {
             redirectAttributes.addFlashAttribute("error", "Parolele nu coincid.");
+            return "redirect:/utilizatori/profil/schimba-parola";
+        }
+        String parolaError = PasswordPolicy.validate(parolaNoua);
+        if (parolaError != null) {
+            redirectAttributes.addFlashAttribute("error", parolaError);
             return "redirect:/utilizatori/profil/schimba-parola";
         }
         User user = userRepository.findByUsername(auth.getName())
